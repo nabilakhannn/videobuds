@@ -8,8 +8,6 @@
 # It will install everything and get your app running.
 # ================================================================
 
-set -e
-
 DOMAIN="$1"
 
 if [ -z "$DOMAIN" ]; then
@@ -29,27 +27,51 @@ echo ""
 echo "📦 Step 1/8: Updating system packages..."
 apt-get update -qq && apt-get upgrade -y -qq
 
-# ── 2. Install Python 3.11, Nginx, PostgreSQL, Certbot ──────────
-echo "📦 Step 2/8: Installing Python, Nginx, PostgreSQL, Certbot..."
+# ── 2. Install Nginx, PostgreSQL, Certbot, Git ──────────────────
+echo "📦 Step 2/8: Installing Nginx, PostgreSQL, Certbot..."
 apt-get install -y -qq \
-    python3.11 python3.11-venv python3.11-dev python3-pip \
     nginx postgresql postgresql-contrib \
     certbot python3-certbot-nginx \
     git ufw
 
-# If python3.11 not available, fall back to default python3
-if ! command -v python3.11 &>/dev/null; then
-    echo "   python3.11 not in repo, installing via deadsnakes PPA..."
-    apt-get install -y -qq software-properties-common
-    add-apt-repository -y ppa:deadsnakes/ppa
-    apt-get update -qq
-    apt-get install -y -qq python3.11 python3.11-venv python3.11-dev
+# ── Install Python with venv support ────────────────────────────
+echo "🐍 Step 2b/8: Setting up Python..."
+
+# Try python3.11 first, then PPA, then fall back to system python3
+if command -v python3.11 &>/dev/null; then
+    PYTHON=python3.11
+    echo "   Found python3.11"
+elif apt-get install -y -qq python3.11 python3.11-venv python3.11-dev 2>/dev/null; then
+    PYTHON=python3.11
+    echo "   Installed python3.11"
+else
+    echo "   python3.11 not available, trying deadsnakes PPA..."
+    apt-get install -y -qq software-properties-common 2>/dev/null
+    if add-apt-repository -y ppa:deadsnakes/ppa 2>/dev/null && apt-get update -qq 2>/dev/null && apt-get install -y -qq python3.11 python3.11-venv python3.11-dev 2>/dev/null; then
+        PYTHON=python3.11
+        echo "   Installed python3.11 from PPA"
+    else
+        # Fall back to system python3
+        PYTHON=python3
+        apt-get install -y -qq python3-venv python3-dev python3-pip
+        echo "   Using system $($PYTHON --version)"
+    fi
 fi
 
-PYTHON=python3.11
+# Verify Python works
+if ! $PYTHON --version &>/dev/null; then
+    echo "❌ Python not found. Cannot continue."
+    exit 1
+fi
+echo "   ✅ Using $($PYTHON --version)"
 
 # ── 3. Set up PostgreSQL database ────────────────────────────────
 echo "🗄️  Step 3/8: Setting up PostgreSQL database..."
+
+# Make sure PostgreSQL is running
+systemctl start postgresql
+systemctl enable postgresql
+
 DB_PASS=$(openssl rand -hex 16)
 
 sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='videobuds'" | grep -q 1 || \
@@ -58,7 +80,7 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='videobuds'" | g
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='videobuds'" | grep -q 1 || \
     sudo -u postgres psql -c "CREATE DATABASE videobuds OWNER videobuds;"
 
-echo "   ✅ Database ready (user: videobuds)"
+echo "   ✅ Database ready"
 
 # ── 4. Create app user and clone code ────────────────────────────
 echo "📂 Step 4/8: Setting up app directory..."
@@ -76,6 +98,7 @@ else
 fi
 
 cd "$APP_DIR"
+echo "   ✅ Code ready"
 
 # ── 5. Python virtual environment + dependencies ────────────────
 echo "🐍 Step 5/8: Installing Python dependencies..."
@@ -83,13 +106,17 @@ sudo -u videobuds $PYTHON -m venv "$APP_DIR/venv"
 sudo -u videobuds "$APP_DIR/venv/bin/pip" install --quiet --upgrade pip
 sudo -u videobuds "$APP_DIR/venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
 sudo -u videobuds "$APP_DIR/venv/bin/pip" install --quiet -r "$APP_DIR/tools/requirements.txt" 2>/dev/null || true
+echo "   ✅ Dependencies installed"
 
 # ── 6. Create .env file ─────────────────────────────────────────
 echo "🔐 Step 6/8: Creating environment file..."
 SECRET=$(openssl rand -hex 32)
 
 ENV_FILE="$APP_DIR/.env"
-cat > "$ENV_FILE" << ENVEOF
+
+# Only create .env if it doesn't already exist (don't overwrite API keys)
+if [ ! -f "$ENV_FILE" ]; then
+    cat > "$ENV_FILE" << ENVEOF
 SECRET_KEY=$SECRET
 FLASK_ENV=production
 DATABASE_URL=postgresql://videobuds:$DB_PASS@localhost:5432/videobuds
@@ -101,12 +128,13 @@ WAVESPEED_API_KEY=
 # HIGGSFIELD_API_KEY_ID=
 # HIGGSFIELD_API_KEY_SECRET=
 ENVEOF
-
-chown videobuds:videobuds "$ENV_FILE"
-chmod 600 "$ENV_FILE"
-
-echo "   ✅ Environment file created at $ENV_FILE"
-echo "   ⚠️  You still need to add your GOOGLE_API_KEY and WAVESPEED_API_KEY!"
+    chown videobuds:videobuds "$ENV_FILE"
+    chmod 600 "$ENV_FILE"
+    echo "   ✅ Environment file created"
+    echo "   ⚠️  You still need to add your GOOGLE_API_KEY and WAVESPEED_API_KEY!"
+else
+    echo "   ✅ Environment file already exists (not overwritten)"
+fi
 
 # Create upload directories
 mkdir -p "$APP_DIR/app/static/uploads" "$APP_DIR/app/static/generated"
@@ -137,7 +165,6 @@ SVCEOF
 systemctl daemon-reload
 systemctl enable videobuds
 systemctl restart videobuds
-
 echo "   ✅ App service started"
 
 # ── 8. Configure Nginx (web server + your domain) ───────────────
@@ -190,13 +217,12 @@ echo "================================================"
 echo "✅ VideoBuds is LIVE!"
 echo "================================================"
 echo ""
-echo "🌐 Visit: http://$DOMAIN"
+echo "🌐 Visit: https://$DOMAIN"
 echo "🔑 Login: admin@videobuds.com / admin"
 echo ""
 echo "⚠️  IMPORTANT — You still need to:"
-echo "   1. Point your domain DNS to this server's IP address"
-echo "   2. Add your API keys to: $ENV_FILE"
-echo "      Edit with: nano $ENV_FILE"
+echo "   Add your API keys: nano $ENV_FILE"
+echo "   Then restart:      systemctl restart videobuds"
 echo ""
 echo "📋 Useful commands:"
 echo "   Check status:    systemctl status videobuds"
