@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block title %}{{ brand.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <a href="{{ url_for('brands.list_brands') }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mb-3 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Brands
+            </a>
+            <div class="flex items-center space-x-3">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ brand.name }}</h1>
+                {% if active_brand and active_brand.id == brand.id %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                    Active
+                </span>
+                {% endif %}
+            </div>
+            {% if brand.tagline %}
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ brand.tagline }}</p>
+            {% endif %}
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="{{ url_for('brands.photo_library', brand_id=brand.id) }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                Photo Library
+            </a>
+            {% if not (active_brand and active_brand.id == brand.id) %}
+            <form method="POST" action="{{ url_for('brands.activate_brand', brand_id=brand.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Activate
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Edit Form -->
+        <div class="lg:col-span-2 space-y-6">
+            <form method="POST" action="{{ url_for('brands.update_brand', brand_id=brand.id) }}" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Basic Info -->
+                <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Basic Information</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Brand Name</label>
+                            <input type="text" id="name" name="name" required
+                                   value="{{ brand.name }}"
+                                   class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors">
+                        </div>
+                        <div>
+                            <label for="tagline" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Tagline</label>
+                            <input type="text" id="tagline" name="tagline"
+                                   value="{{ brand.tagline or '' }}"
+                                   class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors">
+                        </div>
+                        <div>
+                            <label for="target_audience" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Target Audience</label>
+                            <textarea id="target_audience" name="target_audience" rows="3"
+                                      class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                             focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors resize-none">{{ brand.target_audience or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Identity -->
+                <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Visual Identity</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="visual_style" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Visual Style</label>
+                            <textarea id="visual_style" name="visual_style" rows="3"
+                                      class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                             focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors resize-none">{{ brand.visual_style or '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Brand Colors</label>
+                            <div class="grid grid-cols-3 gap-4">
+                                {% set colors = brand.colors or ['#3b82f6', '#8b5cf6', '#ec4899'] %}
+                                {% for i in range(3) %}
+                                <div class="flex items-center space-x-3">
+                                    <input type="color" id="color_{{ i + 1 }}" name="color_{{ i + 1 }}"
+                                           value="{{ colors[i] if i < colors|length else '#6b7280' }}"
+                                           class="w-10 h-10 rounded-lg border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 bg-gray-100 dark:bg-[#2A2A2A] cursor-pointer p-0.5">
+                                    <div>
+                                        <label for="color_{{ i + 1 }}" class="text-xs text-gray-500 dark:text-gray-400">{{ ['Primary', 'Secondary', 'Accent'][i] }}</label>
+                                        <input type="text" name="color_{{ i + 1 }}_hex"
+                                               value="{{ colors[i] if i < colors|length else '#6b7280' }}"
+                                               class="block w-full mt-1 px-2 py-1 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded text-xs text-gray-900 dark:text-white font-mono
+                                                      focus:outline-none focus:ring-1 focus:ring-[#F18523]"
+                                               pattern="^#[0-9A-Fa-f]{6}$">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Strategy -->
+                <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Content Strategy</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="content_pillars" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Content Pillars</label>
+                            <input type="text" id="content_pillars" name="content_pillars"
+                                   value="{{ brand.content_pillars|fromjson|join(', ') if brand.content_pillars else '' }}"
+                                   class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                                   placeholder="Comma-separated pillars">
+                        </div>
+                        <div>
+                            <label for="hashtags" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Hashtags</label>
+                            <input type="text" id="hashtags" name="hashtags"
+                                   value="{{ brand.hashtags|fromjson|join(', ') if brand.hashtags else '' }}"
+                                   class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                                   placeholder="#brand, #marketing">
+                        </div>
+                        <div>
+                            <label for="never_do" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Never Do (Guardrails)</label>
+                            <textarea id="never_do" name="never_do" rows="3"
+                                      class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                             focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors resize-none">{{ brand.never_do or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex items-center justify-end space-x-3">
+                    <a href="{{ url_for('brands.list_brands') }}"
+                       class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg
+                                   focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900
+                                   transition-colors shadow-lg shadow-[#F18523]/20">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Brand Document Sidebar -->
+        <div class="space-y-6">
+            <!-- Brand Doc -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-[#26A0D8]/20 dark:border-[#26A0D8]/40">
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Brand Document</h2>
+                    {% if brand.brand_doc %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-400">
+                        Generated
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400">
+                        Not generated
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="p-6">
+                    {% if brand.brand_doc %}
+                    <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed text-sm break-words overflow-auto max-h-[500px]">{{ brand.brand_doc | simple_md | safe }}</div>
+                    {% else %}
+                    <div class="text-center py-6">
+                        <svg class="w-10 h-10 text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Brand document will be auto-generated from your brand details.</p>
+                        <form method="POST" action="{{ url_for('brands.generate_brand_doc', brand_id=brand.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="inline-flex items-center px-3 py-1.5 bg-[#F18523] hover:bg-[#D97218] text-white text-xs font-medium rounded-lg transition-colors">
+                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                Generate with AI
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Brand Voice (Personas) -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-[#26A0D8]/20 dark:border-[#26A0D8]/40">
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Brand Voice</h2>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#26A0D8]/10 text-[#26A0D8]">
+                        {{ personas|length }} persona{{ 's' if personas|length != 1 }}
+                    </span>
+                </div>
+                <div class="p-6">
+                    {% if personas %}
+                    <div class="space-y-3">
+                        {% for p in personas %}
+                        <a href="{{ url_for('personas.edit', persona_id=p.id) }}"
+                           class="block p-3 rounded-lg border border-gray-100 dark:border-[#2A2A2A] hover:border-[#F18523]/40 transition-colors group">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-[#F18523] transition-colors">{{ p.name }}</span>
+                                {% if p.is_default %}
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#F18523]/10 text-[#F18523] font-medium">Default</span>
+                                {% endif %}
+                            </div>
+                            {% if p.tone %}
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ p.tone }}</p>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">No personas yet. Create one to define your brand's voice.</p>
+                    </div>
+                    {% endif %}
+                    <a href="{{ url_for('personas.create') }}"
+                       class="mt-3 w-full inline-flex items-center justify-center px-3 py-1.5 border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 text-[#26A0D8] hover:bg-[#26A0D8]/10 text-xs font-medium rounded-lg transition-colors">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Persona
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Brand Stats</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Campaigns</span>
+                        <span class="text-gray-900 dark:text-white font-medium">{{ brand.campaigns|list|length if brand.campaigns else 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Content Pillars</span>
+                        <span class="text-gray-900 dark:text-white font-medium">{{ brand.content_pillars|fromjson|length if brand.content_pillars else 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Created</span>
+                        <span class="text-gray-900 dark:text-white font-medium">{{ brand.created_at.strftime('%b %d, %Y') if brand.created_at else 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input[type="color"]').forEach(function(picker) {
+        var hexInput = picker.parentElement.querySelector('input[type="text"]');
+        if (hexInput) {
+            picker.addEventListener('input', function() { hexInput.value = picker.value; });
+            hexInput.addEventListener('input', function() {
+                if (/^#[0-9A-Fa-f]{6}$/.test(hexInput.value)) picker.value = hexInput.value;
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% block title %}New Campaign{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('campaigns.list_campaigns') }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mb-4 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Campaigns
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create New Campaign</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">
+            {% if active_brand %}
+            Creating campaign for <span class="text-[#F18523] font-medium">{{ active_brand.name }}</span>
+            {% else %}
+            Plan and schedule your next content campaign
+            {% endif %}
+        </p>
+    </div>
+
+    {% if not active_brand %}
+    <div class="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-4 mb-6">
+        <div class="flex items-center space-x-3">
+            <svg class="w-5 h-5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <p class="text-sm text-yellow-200">
+                You need to <a href="{{ url_for('brands.list_brands') }}" class="underline font-medium">select an active brand</a> before creating a campaign.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Campaign Form -->
+    <form method="POST" action="{{ url_for('campaigns.create_campaign') }}" class="space-y-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Campaign Details -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Campaign Details</h2>
+            <div class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Campaign Name <span class="text-red-400">*</span></label>
+                    <input type="text" id="name" name="name" required
+                           value="{{ request.form.get('name', '') }}"
+                           class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                  focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                           placeholder="e.g., March Content Sprint">
+                </div>
+
+                <!-- Start Date and Post Count -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Start Date <span class="text-red-400">*</span></label>
+                        <input type="date" id="start_date" name="start_date" required
+                               value="{{ request.form.get('start_date', '') }}"
+                               class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white
+                                      focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors
+                                      dark:[color-scheme:dark]">
+                    </div>
+                    <div>
+                        <label for="post_count" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Number of Posts</label>
+                        <input type="number" id="post_count" name="post_count" min="1" max="90"
+                               value="{{ request.form.get('post_count', '30') }}"
+                               class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white
+                                      focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors">
+                        <p class="mt-1 text-xs text-gray-500">Default: 30 posts (one per day)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Persona Selector -->
+        {% if personas %}
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Content Persona</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Choose a persona to shape the AI's writing voice and tone.</p>
+            <select name="persona_id"
+                    class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors">
+                <option value="">None — use default AI voice</option>
+                {% for persona in personas %}
+                <option value="{{ persona.id }}" {{ 'selected' if persona.is_default else '' }}>
+                    {{ persona.name }}{% if persona.tone %} — {{ persona.tone }}{% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- Campaign Intention -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Campaign Intention</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">What is the goal of this campaign? AI will tailor all content to this intention.</p>
+
+            <input type="hidden" id="intention" name="intention" value="{{ request.form.get('intention', 'brand_awareness') }}">
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="brand_awareness"
+                     onclick="selectIntention(this, 'brand_awareness')">
+                    <div class="text-2xl mb-2">&#127775;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Brand Awareness</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Introduce your brand to new audiences</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="product_launch"
+                     onclick="selectIntention(this, 'product_launch')">
+                    <div class="text-2xl mb-2">&#128640;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product Launch</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Showcase a new product or service</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="engagement"
+                     onclick="selectIntention(this, 'engagement')">
+                    <div class="text-2xl mb-2">&#128172;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Engagement</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Build relationships, start conversations</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="education"
+                     onclick="selectIntention(this, 'education')">
+                    <div class="text-2xl mb-2">&#128218;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Education & Value</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Share tips, tutorials, how-tos</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="seasonal"
+                     onclick="selectIntention(this, 'seasonal')">
+                    <div class="text-2xl mb-2">&#127876;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Seasonal</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Capitalize on seasonal moments</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="behind_scenes"
+                     onclick="selectIntention(this, 'behind_scenes')">
+                    <div class="text-2xl mb-2">&#127916;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Behind the Scenes</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Show the human side of your brand</p>
+                </div>
+                <div class="intention-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-intention="sales"
+                     onclick="selectIntention(this, 'sales')">
+                    <div class="text-2xl mb-2">&#128176;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Sales & Promotion</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Drive conversions and sales</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Style Preset Selector -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Default Style Preset</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">Choose a visual style for the campaign. You can customize individual posts later.</p>
+
+            <input type="hidden" id="style_preset" name="style_preset" value="{{ request.form.get('style_preset', 'pop_art') }}">
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <!-- Pop Art -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="pop_art"
+                     onclick="selectStyle(this, 'pop_art')">
+                    <div class="text-3xl mb-2">&#127912;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pop Art</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Bold colors, comic-style graphics, high contrast and energy</p>
+                </div>
+
+                <!-- Minimalist -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="minimalist"
+                     onclick="selectStyle(this, 'minimalist')">
+                    <div class="text-3xl mb-2">&#9711;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Minimalist</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clean lines, whitespace, subtle elegance and simplicity</p>
+                </div>
+
+                <!-- Corporate -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="corporate"
+                     onclick="selectStyle(this, 'corporate')">
+                    <div class="text-3xl mb-2">&#128188;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Corporate</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Professional, polished, business-appropriate imagery</p>
+                </div>
+
+                <!-- UGC -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="ugc"
+                     onclick="selectStyle(this, 'ugc')">
+                    <div class="text-3xl mb-2">&#128241;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">UGC Style</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Authentic, phone-shot feel, relatable and casual</p>
+                </div>
+
+                <!-- Flat Lay -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="flat_lay"
+                     onclick="selectStyle(this, 'flat_lay')">
+                    <div class="text-3xl mb-2">&#128247;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Flat Lay</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Top-down product photography, organized and aesthetic</p>
+                </div>
+
+                <!-- Cinematic -->
+                <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50"
+                     data-style="cinematic"
+                     onclick="selectStyle(this, 'cinematic')">
+                    <div class="text-3xl mb-2">&#127909;</div>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Cinematic</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dramatic lighting, film-like quality, storytelling mood</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Estimate -->
+        <div class="bg-gray-50 dark:bg-[#1E1E1E]/50 border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Estimated Cost</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">$0.04 per image &middot; Nano Banana</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-bold text-gray-900 dark:text-white" id="cost-estimate">$1.20</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400" id="cost-breakdown">30 images &times; $0.04</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center justify-end space-x-3 pt-2">
+            <a href="{{ url_for('campaigns.list_campaigns') }}"
+               class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Cancel
+            </a>
+            <button type="submit" {{ 'disabled' if not active_brand else '' }}
+                    class="px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg
+                           focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-[#1E1E1E]
+                           transition-colors shadow-lg shadow-[#F18523]/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                Create Campaign
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Style preset selector
+    function selectStyle(el, style) {
+        document.getElementById('style_preset').value = style;
+        document.querySelectorAll('.style-card').forEach(function(card) {
+            card.classList.remove('border-[#F18523]', 'bg-[#F18523]/5');
+            card.classList.add('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        });
+        el.classList.remove('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        el.classList.add('border-[#F18523]', 'bg-[#F18523]/5');
+    }
+
+    // Intention selector
+    function selectIntention(el, intention) {
+        document.getElementById('intention').value = intention;
+        document.querySelectorAll('.intention-card').forEach(function(card) {
+            card.classList.remove('border-pink-400', 'bg-pink-400/5');
+            card.classList.add('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        });
+        el.classList.remove('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        el.classList.add('border-pink-400', 'bg-pink-400/5');
+    }
+
+    // Initialize selected style and intention
+    (function() {
+        var currentStyle = document.getElementById('style_preset').value || 'pop_art';
+        var card = document.querySelector('.style-card[data-style="' + currentStyle + '"]');
+        if (card) selectStyle(card, currentStyle);
+
+        var currentIntention = document.getElementById('intention').value || 'brand_awareness';
+        var intentCard = document.querySelector('.intention-card[data-intention="' + currentIntention + '"]');
+        if (intentCard) selectIntention(intentCard, currentIntention);
+    })();
+
+    // Cost estimate calculator ($0.04/image retail)
+    var COST_PER_IMAGE = 0.04;
+    var postCountInput = document.getElementById('post_count');
+    if (postCountInput) {
+        function updateCost() {
+            var count = parseInt(postCountInput.value) || 30;
+            var total = (count * COST_PER_IMAGE).toFixed(2);
+            document.getElementById('cost-estimate').textContent = '$' + total;
+            document.getElementById('cost-breakdown').textContent = count + ' images \u00D7 $' + COST_PER_IMAGE.toFixed(2);
+        }
+        postCountInput.addEventListener('input', updateCost);
+        updateCost();
+    }
+</script>
+{% endblock %}

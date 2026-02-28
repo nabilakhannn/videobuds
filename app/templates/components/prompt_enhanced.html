@@ -1,0 +1,32 @@
+{% if error %}
+<div class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mt-2">
+    <p class="text-xs text-red-400">{{ error }}</p>
+</div>
+{% elif prompt %}
+<div class="mt-2 p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 border border-[#F18523]/30 rounded-lg">
+    <p class="text-[10px] uppercase tracking-wider text-[#F18523] font-medium mb-1.5">AI-Enhanced Prompt</p>
+    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-2">{{ prompt }}</p>
+    <button type="button"
+            class="text-xs font-medium px-3 py-1 bg-[#F18523] hover:bg-[#D97218] text-white rounded transition-colors"
+            onclick="usePrompt(this)">
+        Use This Prompt
+    </button>
+</div>
+<script>
+function usePrompt(btn) {
+    var text = btn.parentElement.querySelector('p.text-gray-600').textContent.trim();
+    var textarea = document.querySelector('#editor-content textarea[name="custom_prompt"]');
+    if (textarea) {
+        textarea.value = text;
+        textarea.dispatchEvent(new Event('input'));
+        // Switch to prompt tab if not already there
+        var promptTab = document.querySelector('#editor-content [data-tab="prompt-tab"]');
+        if (promptTab) promptTab.click();
+    }
+}
+</script>
+{% else %}
+<div class="p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 rounded-lg mt-2">
+    <p class="text-xs text-gray-500 dark:text-gray-400">Could not generate enhanced prompt. Try again.</p>
+</div>
+{% endif %}

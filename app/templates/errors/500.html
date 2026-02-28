@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center max-w-md">
+        <!-- Error Graphic -->
+        <div class="relative inline-block mb-8">
+            <div class="text-[120px] font-black text-gray-200 dark:text-[#1E1E1E] leading-none select-none">500</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message -->
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Something went wrong</h1>
+        <p class="text-gray-500 dark:text-gray-400 mb-8">
+            An unexpected error occurred on our end. The team has been notified. Please try again in a moment.
+        </p>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-center space-x-3">
+            <a href="javascript:location.reload()"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#2A2A2A]/80 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Try Again
+            </a>
+            <a href="{{ url_for('dashboard.index') if current_user and current_user.is_authenticated else url_for('auth.login') }}"
+               class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Go Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

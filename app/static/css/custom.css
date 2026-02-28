@@ -1,0 +1,97 @@
+/* VideoBuds Video Studio — Custom CSS
+   Light/white theme with Azure Afternoon borders + Pumpkin Pie accents.
+   Dark mode supported via Tailwind dark: class. */
+
+/* ── Calendar Grid ─────────────────────────────────────── */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.75rem;
+}
+
+/* ── Post Card ─────────────────────────────────────────── */
+.post-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(38, 160, 216, 0.2);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.dark .post-card {
+    background: #1E1E1E;
+    border-color: rgba(38, 160, 216, 0.4);
+}
+
+.post-card:hover {
+    box-shadow: 0 4px 16px rgba(241, 133, 35, 0.12);
+    transform: translateY(-2px);
+    border-color: rgba(38, 160, 216, 0.4);
+}
+
+.dark .post-card:hover {
+    box-shadow: 0 4px 16px rgba(241, 133, 35, 0.2);
+    border-color: rgba(38, 160, 216, 0.6);
+}
+
+/* Pulse animation while an image is being generated */
+.post-card.generating {
+    animation: pulse-card 1.5s ease-in-out infinite;
+    border-color: #F18523;
+}
+
+@keyframes pulse-card {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(241, 133, 35, 0.4);
+    }
+    50% {
+        opacity: 0.85;
+        box-shadow: 0 0 0 6px rgba(241, 133, 35, 0);
+    }
+}
+
+/* ── Side Panel (post detail / editor) ─────────────────── */
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100vh;
+    background: #FFFFFF;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 50;
+    overflow-y: auto;
+}
+
+.dark .side-panel {
+    background: #1A1A1A;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.side-panel.open {
+    transform: translateX(0);
+}
+
+/* Overlay behind the side panel */
+.side-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.dark .side-panel-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.side-panel-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}

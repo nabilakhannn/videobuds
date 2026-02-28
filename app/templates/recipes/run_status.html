@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Run #{{ run.id }} — {{ db_row.name if db_row else 'Recipe' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back link -->
+    <a href="{{ url_for('recipes.library') }}"
+       class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-[#F18523] mb-6 transition-colors">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back to Recipes
+    </a>
+
+    <!-- Header -->
+    <div class="flex items-center space-x-3 mb-6">
+        {% if recipe %}
+        <span class="text-3xl">{{ recipe.icon }}</span>
+        {% endif %}
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                {{ db_row.name if db_row else 'Recipe' }} — Run #{{ run.id }}
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Started {{ run.created_at.strftime('%b %d, %Y at %I:%M %p') if run.created_at else 'just now' }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Progress card (polls via HTMX — pauses during awaiting_approval) -->
+    <div id="run-progress"
+         hx-get="{{ url_for('recipes.run_status', run_id=run.id) }}"
+         hx-trigger="{% if run.status in ('pending', 'running') %}every 3s{% endif %}"
+         hx-swap="innerHTML"
+         hx-headers='{"HX-Request": "true"}'>
+        {% include "recipes/_run_progress.html" %}
+    </div>
+</div>
+{% endblock %}

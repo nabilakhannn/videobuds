@@ -1,0 +1,81 @@
+{# Style Picker Component - Reusable 6-preset style selector #}
+{# Expected context: selected_style (optional, defaults to 'pop_art'), input_name (optional, defaults to 'style_preset') #}
+
+{% set current = selected_style if selected_style is defined else 'pop_art' %}
+{% set field_name = input_name if input_name is defined else 'style_preset' %}
+
+<input type="hidden" id="style-picker-input" name="{{ field_name }}" value="{{ current }}">
+
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="style-picker-grid">
+    <!-- Pop Art -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'pop_art' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="pop_art"
+         onclick="pickStyle(this, 'pop_art')">
+        <div class="text-3xl mb-2">&#127912;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pop Art</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Bold colors, comic-style graphics, high contrast and energy</p>
+    </div>
+
+    <!-- Minimalist -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'minimalist' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="minimalist"
+         onclick="pickStyle(this, 'minimalist')">
+        <div class="text-3xl mb-2">&#9711;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Minimalist</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clean lines, whitespace, subtle elegance and simplicity</p>
+    </div>
+
+    <!-- Corporate -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'corporate' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="corporate"
+         onclick="pickStyle(this, 'corporate')">
+        <div class="text-3xl mb-2">&#128188;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Corporate</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Professional, polished, business-appropriate imagery</p>
+    </div>
+
+    <!-- UGC Style -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'ugc' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="ugc"
+         onclick="pickStyle(this, 'ugc')">
+        <div class="text-3xl mb-2">&#128241;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">UGC Style</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Authentic, phone-shot feel, relatable and casual</p>
+    </div>
+
+    <!-- Flat Lay -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'flat_lay' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="flat_lay"
+         onclick="pickStyle(this, 'flat_lay')">
+        <div class="text-3xl mb-2">&#128247;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Flat Lay</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Top-down product photography, organized and aesthetic</p>
+    </div>
+
+    <!-- Cinematic -->
+    <div class="style-card cursor-pointer border-2 rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-[#2A2A2A]/50
+                {{ 'border-[#F18523] bg-[#F18523]/5' if current == 'cinematic' else 'border-[#26A0D8]/20 dark:border-[#26A0D8]/40' }}"
+         data-style="cinematic"
+         onclick="pickStyle(this, 'cinematic')">
+        <div class="text-3xl mb-2">&#127909;</div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Cinematic</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dramatic lighting, film-like quality, storytelling mood</p>
+    </div>
+</div>
+
+<script>
+    function pickStyle(el, style) {
+        document.getElementById('style-picker-input').value = style;
+        document.querySelectorAll('#style-picker-grid .style-card').forEach(function(card) {
+            card.classList.remove('border-[#F18523]', 'bg-[#F18523]/5');
+            card.classList.add('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        });
+        el.classList.remove('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        el.classList.add('border-[#F18523]', 'bg-[#F18523]/5');
+    }
+</script>

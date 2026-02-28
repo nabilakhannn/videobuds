@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }} - Calendar{% endblock %}
+
+{% block head %}
+<style>
+    .post-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .dark .post-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .post-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .post-card.active { ring: 2px solid #F18523; }
+    #editor-panel { transition: transform 0.3s ease, opacity 0.3s ease; }
+    #editor-panel.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+    .generating-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Campaign Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+        <div>
+            <a href="{{ url_for('campaigns.list_campaigns') }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mb-3 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Campaigns
+            </a>
+            <div class="flex items-center space-x-3 flex-wrap">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ campaign.name }}</h1>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {{ 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' if campaign.status == 'draft' else '' }}
+                            {{ 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' if campaign.status == 'generating' else '' }}
+                            {{ 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400' if campaign.status == 'generated' else '' }}
+                            {{ 'bg-[#F18523]/10 text-[#F18523]' if campaign.status == 'approved' else '' }}
+                            {{ 'bg-amber-100 dark:bg-amber-400/10 text-amber-700 dark:text-amber-400' if campaign.status == 'exported' else '' }}
+                            {{ 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' if not campaign.status else '' }}">
+                    {{ campaign.status|capitalize if campaign.status else 'Draft' }}
+                </span>
+            </div>
+            <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {% if active_brand %}
+                <span class="flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full" style="background-color: {{ active_brand.colors[0] if active_brand.colors else '#3b82f6' }};"></span>
+                    <span>{{ active_brand.name }}</span>
+                </span>
+                {% endif %}
+                {% if campaign.start_date %}
+                <span>{{ campaign.start_date.strftime('%b %d') }} - {{ (campaign.start_date + timedelta(days=campaign.post_count - 1)).strftime('%b %d, %Y') if timedelta else '' }}</span>
+                {% endif %}
+                <span>{{ campaign.post_count or 30 }} posts</span>
+                <span class="text-yellow-500 dark:text-yellow-400 font-medium">${{ '%.2f'|format(campaign.total_cost or 0) }} spent</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3 mt-4 lg:mt-0">
+            <form method="POST" action="{{ url_for('generate.generate_campaign', campaign_id=campaign.id) }}" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-[#F18523]/20"
+                        onclick="return confirm('Generate all posts? Estimated cost: ${{ '%.2f'|format((campaign.post_count or 30) * 0.04) }}')">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Generate All
+                    <span class="ml-2 px-1.5 py-0.5 bg-white/10 rounded text-xs">${{ '%.2f'|format((campaign.post_count or 30) * 0.04) }}</span>
+                </button>
+            </form>
+            <a href="{{ url_for('export.preview', campaign_id=campaign.id) }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Export
+            </a>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex items-center space-x-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
+        <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
+            <span>Draft</span>
+        </span>
+        <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 generating-pulse"></span>
+            <span>Generating</span>
+        </span>
+        <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+            <span>Generated</span>
+        </span>
+        <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#F18523]"></span>
+            <span>Approved</span>
+        </span>
+        <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+            <span>Rejected</span>
+        </span>
+    </div>
+
+    <!-- Main Layout: Calendar + Editor Panel -->
+    <div class="flex gap-6">
+        <!-- Calendar Grid -->
+        <div class="flex-1 min-w-0" id="calendar-grid">
+            <!-- Day Headers -->
+            <div class="grid grid-cols-7 gap-1 mb-1">
+                {% for day_name in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                <div class="text-center text-xs font-medium text-gray-500 uppercase tracking-wider py-2">
+                    {{ day_name }}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="grid grid-cols-7 gap-1.5" id="posts-grid">
+                {# Calculate offset for first day of campaign to align to weekday #}
+                {% if campaign.start_date %}
+                    {% set start_weekday = campaign.start_date.weekday() %}
+                    {% for i in range(start_weekday) %}
+                    <div class="aspect-square"></div>
+                    {% endfor %}
+                {% endif %}
+
+                {% set post_count = campaign.post_count or 30 %}
+                {% for day in range(1, post_count + 1) %}
+                    {% set post = posts[day - 1] if posts is defined and (day - 1) < posts|length else none %}
+                    {% set status = post.status if post and post.status else 'draft' %}
+
+                    <div class="post-card bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-lg overflow-hidden cursor-pointer hover:border-gray-400 dark:hover:border-gray-500"
+                         hx-get="{{ url_for('posts.get_post', campaign_id=campaign.id, day=day) }}"
+                         hx-target="#editor-content"
+                         hx-swap="innerHTML"
+                         onclick="openEditor(this, {{ day }})"
+                         id="post-card-{{ day }}">
+                        <!-- Thumbnail -->
+                        <div class="aspect-square bg-gray-50 dark:bg-[#2A2A2A]/50 relative">
+                            {% if post and post.image_url %}
+                            <img src="{{ post.image_url }}" alt="Day {{ day }}"
+                                 class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="text-2xl font-bold text-gray-600">{{ day }}</span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Status Dot -->
+                            <div class="absolute top-1.5 right-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full block
+                                            {{ 'bg-gray-500' if status == 'draft' else '' }}
+                                            {{ 'bg-yellow-500 generating-pulse' if status == 'generating' else '' }}
+                                            {{ 'bg-green-500' if status == 'generated' else '' }}
+                                            {{ 'bg-[#F18523]' if status == 'approved' else '' }}
+                                            {{ 'bg-red-500' if status == 'rejected' else '' }}"></span>
+                            </div>
+
+                            <!-- Day Badge -->
+                            <div class="absolute top-1.5 left-1.5">
+                                <span class="text-[10px] font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">
+                                    {{ day }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Caption Preview -->
+                        <div class="p-1.5">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight min-h-[24px]">
+                                {% if post and post.caption %}
+                                {{ post.caption[:60] }}{{ '...' if post.caption|length > 60 else '' }}
+                                {% else %}
+                                <span class="text-gray-600 italic">No caption</span>
+                                {% endif %}
+                            </p>
+                            {% if post and post.content_pillar %}
+                            <span class="inline-block mt-1 text-[9px] font-medium px-1 py-0.5 bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 rounded truncate max-w-full">
+                                {{ post.content_pillar }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Editor Side Panel -->
+        <div id="editor-panel" class="hidden w-[420px] flex-shrink-0 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl">
+                <!-- Panel Header -->
+                <div class="flex items-center justify-between px-5 py-3 border-b border-[#26A0D8]/20 dark:border-[#26A0D8]/40">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white" id="editor-title">Post Editor</h3>
+                    <button onclick="closeEditor()"
+                            class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2A2A2A]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Panel Content (loaded via HTMX) -->
+                <div id="editor-content" class="p-5">
+                    <div class="text-center py-8">
+                        <div class="w-8 h-8 border-2 border-[#F18523] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Loading editor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var activeCard = null;
+
+    function openEditor(cardEl, day) {
+        // Remove active state from previous card
+        if (activeCard) {
+            activeCard.classList.remove('border-[#F18523]', 'ring-2', 'ring-[#F18523]/30');
+            activeCard.classList.add('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        }
+
+        // Set active state on clicked card
+        cardEl.classList.remove('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+        cardEl.classList.add('border-[#F18523]', 'ring-2', 'ring-[#F18523]/30');
+        activeCard = cardEl;
+
+        // Show editor panel
+        var panel = document.getElementById('editor-panel');
+        panel.classList.remove('hidden');
+        document.getElementById('editor-title').textContent = 'Day ' + day + ' - Post Editor';
+    }
+
+    function closeEditor() {
+        var panel = document.getElementById('editor-panel');
+        panel.classList.add('hidden');
+
+        if (activeCard) {
+            activeCard.classList.remove('border-[#F18523]', 'ring-2', 'ring-[#F18523]/30');
+            activeCard.classList.add('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+            activeCard = null;
+        }
+    }
+
+    // Close editor on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeEditor();
+    });
+
+    // After HTMX swap, reinitialize any scripts in the editor panel
+    document.body.addEventListener('htmx:afterSwap', function(e) {
+        if (e.detail.target.id === 'editor-content') {
+            // Re-init style picker if present
+            var styleInput = document.querySelector('#editor-content input[name="style_preset"]');
+            if (styleInput) {
+                var currentStyle = styleInput.value;
+                var card = document.querySelector('#editor-content .style-card[data-style="' + currentStyle + '"]');
+                if (card) {
+                    card.classList.remove('border-[#26A0D8]/20', 'dark:border-[#26A0D8]/40');
+                    card.classList.add('border-[#F18523]', 'bg-[#F18523]/5');
+                }
+            }
+
+            // Re-init tabs
+            var firstTab = document.querySelector('#editor-content [data-tab]');
+            if (firstTab) firstTab.click();
+        }
+    });
+</script>
+{% endblock %}

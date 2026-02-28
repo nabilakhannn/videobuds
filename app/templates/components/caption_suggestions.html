@@ -1,0 +1,33 @@
+{% if error %}
+<div class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+    <p class="text-xs text-red-400">{{ error }}</p>
+</div>
+{% elif captions %}
+<div class="space-y-2 mt-2">
+    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-medium">AI Suggestions</p>
+    {% for caption in captions %}
+    <div class="group p-2.5 bg-gray-50 dark:bg-[#2A2A2A]/50 border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-lg hover:border-[#F18523]/50 cursor-pointer transition-colors"
+         onclick="useCaption(this)">
+        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{{ caption }}</p>
+        <button type="button"
+                class="mt-1.5 text-[10px] font-medium text-[#F18523] opacity-0 group-hover:opacity-100 transition-opacity">
+            Use this caption
+        </button>
+    </div>
+    {% endfor %}
+</div>
+<script>
+function useCaption(el) {
+    var text = el.querySelector('p').textContent.trim();
+    var textarea = document.querySelector('#editor-content textarea[name="caption"]');
+    if (textarea) {
+        textarea.value = text;
+        textarea.dispatchEvent(new Event('input'));
+    }
+}
+</script>
+{% else %}
+<div class="p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 rounded-lg">
+    <p class="text-xs text-gray-500 dark:text-gray-400">No suggestions available. Try adding more brand details.</p>
+</div>
+{% endif %}

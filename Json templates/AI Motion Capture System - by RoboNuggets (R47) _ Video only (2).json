@@ -1,0 +1,358 @@
+{
+  "name": "AI Motion Capture System - by RoboNuggets (R47) | Video only",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# AI Motion Capture System (by RoboNuggets)\n## Author: Jay E | R47",
+        "height": 416,
+        "width": 416,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -352
+      ],
+      "id": "46b5d7e7-2b4e-4f03-886a-f8b36bb0f659",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "bb343170-4c3e-4565-b056-1de3d4e0600f",
+      "name": "Execute"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8",
+          "mode": "list",
+          "cachedResultName": "Wan animate",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "create"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        -96
+      ],
+      "id": "2a55b8f5-b080-40a4-af3b-232dee825489",
+      "name": "INPUT",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8",
+          "mode": "list",
+          "cachedResultName": "Wan animate",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('INPUT').item.json.row_number }}",
+            "status": "done",
+            "output": "={{ $json.video.url }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "char",
+              "displayName": "char",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "driving video",
+              "displayName": "driving video",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image reference",
+              "displayName": "image reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        -96
+      ],
+      "id": "67430d3e-3b00-48bd-a3c6-016d713da0f1",
+      "name": "OUTPUT",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-14b/animate/move",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_url\": \"{{ $json['driving video'] }}\",\n  \"image_url\": \"{{ $json['image reference'] }}\",\n  \"guidance_scale\": 1,\n  \"resolution\": \"720p\",\n  \"num_inference_steps\": 6,\n  \"enable_safety_checker\": true,\n  \"enable_output_safety_checker\": false,\n  \"shift\": 8,\n  \"video_quality\": \"maximum\",\n  \"video_write_mode\": \"balanced\",\n  \"use_turbo\": true\n}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        736,
+        -96
+      ],
+      "id": "a9bff052-769a-4c98-92be-81b1355802c6",
+      "name": "Transform Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 600
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        -96
+      ],
+      "id": "0135f9a1-0de1-4bad-bad6-ff3cb0e6435d",
+      "name": "Wait",
+      "webhookId": "cf0ba50c-ac26-44b5-8c03-de5990998733"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        -96
+      ],
+      "id": "2ea48c52-98e6-4b1b-a204-9f6d2f766a15",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## INPUT",
+        "height": 208,
+        "width": 182,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -144
+      ],
+      "id": "7cfdf526-6134-4bd1-97ed-96733b35f50f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## OUTPUT",
+        "height": 208,
+        "width": 182,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        -144
+      ],
+      "id": "e257b142-eebb-4c47-b965-50f3488a740b",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute": {
+      "main": [
+        [
+          {
+            "node": "INPUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INPUT": {
+      "main": [
+        [
+          {
+            "node": "Transform Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "OUTPUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0e7c165c-0ba3-4af3-ae87-5dc6c0ada7c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "addaa68bf5af965c06c3765c811549851eb65db8df4677e0c6253726ffcac493"
+  },
+  "id": "9j06c9feZW98GYed",
+  "tags": []
+}

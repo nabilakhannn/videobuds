@@ -1,0 +1,1238 @@
+{
+  "name": "AI Influencer Toolkit (by RoboNuggets 🥚) | R44",
+  "nodes": [
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -272,
+        -144
+      ],
+      "id": "5f50e39d-cba6-4d47-84ae-a0e81776562a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        -272
+      ],
+      "id": "02f2a299-dddc-46e7-9864-5e0bc68d5378",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d4bdade1-1b1b-42ae-983b-e97afad12750",
+              "leftValue": "={{ $('Split Out').item.json.post_type }}",
+              "rightValue": "video",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "6ead6f27-16c2-47d4-be5f-771dfb12a56f",
+              "leftValue": "={{ $json.publish_status }}",
+              "rightValue": "error",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        -128
+      ],
+      "id": "ce8093d4-90b0-4b24-8da8-339d39f4399d",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "## Step 1: Give your INPUTS",
+        "height": 176,
+        "width": 688,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -400
+      ],
+      "id": "392bba59-d5d3-4527-bf99-04a70ab1f655",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -128
+      ],
+      "id": "d7af0419-eb87-4198-a354-be5472409289",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "data.downloadUrl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        64,
+        -128
+      ],
+      "id": "d3f81b55-a6a7-4d50-8e0e-8c8f90b19410",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "content": "## Step2: AI Influencer THINKs of posts",
+        "height": 176,
+        "width": 608,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -400
+      ],
+      "id": "6052982c-1491-4153-9c5a-65ebd02b7d88",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        208
+      ],
+      "id": "5e4eb035-b888-493c-8c07-3e7014d91bd1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "accountId": {
+          "__rl": true,
+          "value": "4116",
+          "mode": "list",
+          "cachedResultName": "testingprofile13125",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/4116"
+        },
+        "postContentText": "={{ $('Get post').item.json.caption }}",
+        "postContentMediaUrls": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "c41697d4-6efb-46dd-8375-ec7405c46cf6",
+      "name": "📷Instagram",
+      "credentials": {
+        "blotatoApi": {
+          "id": "kL3kwivG5ErCmAl8",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "mediaUrl": "={{ $json.video_output ? $json.video_output : $json.image_output }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        240,
+        208
+      ],
+      "id": "553be513-000b-4b93-bcfe-a6d6074146ec",
+      "name": "Ready in Blotato",
+      "credentials": {
+        "blotatoApi": {
+          "id": "kL3kwivG5ErCmAl8",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "##  Optional: Auto-post to socials",
+        "height": 144,
+        "width": 812,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "5d3b2efb-5901-48f6-9376-982b3e28e738",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Step 3: Get your OUTPUTS",
+        "height": 176,
+        "width": 688,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -400
+      ],
+      "id": "80d63078-5af1-4ec4-9f89-7de921f84c3e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# AI Influencer Toolkit (by RoboNuggets 🥚)\n## Author: Jay E | R44 lesson",
+        "height": 112,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -528
+      ],
+      "id": "0f1f56ce-c8c6-470e-a0d0-b22b73d280c9",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "formTitle": "Creative Brief",
+        "formDescription": "Give directions to your AI character here",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "character image",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "setting image",
+              "fieldType": "file",
+              "multipleFiles": false
+            },
+            {
+              "fieldLabel": "item image",
+              "fieldType": "file",
+              "multipleFiles": false
+            },
+            {
+              "fieldLabel": "how many images?",
+              "fieldType": "number",
+              "placeholder": "1",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "how many videos?",
+              "fieldType": "number",
+              "placeholder": "0",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Creative direction",
+              "placeholder": "(You can also provide a script here)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "aspect ratio",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "9:16"
+                  },
+                  {
+                    "option": "16:9"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        -128
+      ],
+      "id": "8f5ef23c-2e28-4c8b-90c2-2fc6eb47ba7a",
+      "name": "Form",
+      "webhookId": "14f158f7-cce5-44a3-8e70-f6bd775be4ec"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "character_image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -320
+      ],
+      "id": "a6fc4405-c400-4a77-8389-ca97cbbc8d99",
+      "name": "Image1"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "setting_image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -128
+      ],
+      "id": "58bb1ad2-2dd1-4b5b-a151-463a019b8429",
+      "name": "Image2"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "item_image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        80
+      ],
+      "id": "e1e7170d-3315-44b1-ac10-818985ba20e6",
+      "name": "Image3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kieai.redpandaai.co/api/file-base64-upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "base64Data",
+              "value": "={{ $json.data }}"
+            },
+            {
+              "name": "uploadPath",
+              "value": "documents/uploads"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $now }}.jpg"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "id": "eec0dd75-8f9f-4664-887b-ff9d9300ec8b",
+      "name": "Image URLs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -144,
+        -128
+      ],
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GY8EwBg1KMzSwh9X",
+          "name": "Kie AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Give an image and video prompt for the posts below. \n Use the Think tool to review your output\n\nNumber of image posts needed:{{ $('Form').item.json['how many images?'] }}\nNumber of video posts needed:{{ $('Form').item.json['how many videos?'] }}\nAspect ratio: {{ $('Form').item.json['aspect ratio'] }}\n\nCREATIVE DIRECTION: {{ $('Form').item.json['Creative direction'] }}\n\n\n***\n\nIMAGE REFERENCES:\nThe following image references are provided. Note that if the URL is present, that it means the image reference exists. If you can, please surmise what the image contains based on the URL details so that your prompt adheres to it.\n\ncharacter_image {{ $('Form').item.json['character image'].filename }}\nsetting_image {{ $('Form').item.json['setting image'].filename }}\nitem_image {{ $('Form').item.json['item image'].filename }}\n\n\n***\n\n\nCHARACTER BRIEF:\nName: Miquela\nAge\t25\nShe’s expressive, fashion-forward, and unafraid to experiment with bold looks. Her posts balance playful selfies, high-fashion streetwear, and behind-the-scenes creative moments that feel spontaneous yet carefully curated.\n\nPersonality\tBubbly, confident, expressive, and adventurous — she radiates positive energy and connects easily with her audience through humor and authenticity.\n\nVoice Style & Accent\tCheerful, natural conversational tone with a distinct Australian accent. She speaks casually, often using Gen Z slang and quick, witty phrasing that feels off-the-cuff but always on trend.\n\nTarget Audience\tGen Z and young millennials interested in fashion, digital culture, and creative tech. Followers who love style inspiration, futuristic aesthetics, and influencer authenticity with a digital twist.\n\nStyle Guide\tHighly stylized yet approachable visual tone. Fashion is bold and experimental, featuring vibrant colors, metallic accents, and playful streetwear. Lighting is natural with occasional high-contrast studio shots. Frequent use of city backdrops, mirror selfies, and creative compositions that showcase individuality and confidence. Posts often include subtle nods to virtual identity and self-expression through digital means. The overall feed vibe is hyperreal, creative, and trend-driven — like a fashionable friend",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=system_prompt: |\n  ## SYSTEM PROMPT: Unified Prompt Generator for AI Influencer Multimedia Posts 🎥🖼️\n\n  A – Ask:\n    Generate detailed prompts for a series of image and video posts based on a creative brief. Return a single JSON object with a \"posts\" key containing one object per post. Each object must contain a title, caption, post_type, image_prompt, and video_prompt.\n\n  G – Guidance:\n    role: content prompt engineer specializing in influencer multimedia posts  \n    output_count: Equal to total number of image and video posts requested by the user  \n    character_limit: None  \n    constraints:\n      - Output must be a structured JSON object with a single top-level key: \"posts\"\n      - Each post under \"posts\" must include:\n        - `title`: Max 3 words, stylized and catchy\n        - `caption`: No quotes, social and human tone, must include exactly 1 emoji and 2 hashtags\n        - `post_type`: Either \"image\" or \"video\"\n        - `image_prompt`: Always present, even for video posts\n        - `video_prompt`: Always present; if post_type is \"image\", value must be: \"not applicable\"\n      - Follow the creative direction closely; use it to guide:\n        - the physical composition and style of the post\n        - what the subject is doing (especially interaction with item if the image is provided)\n        - tone and polish of the aesthetic\n      - Follow the character brief to guide:\n        - tone of caption\n        - energy of title\n      - Use reference images (character_image, setting_image, item_image) when provided; infer plausible content if only filenames are given\n      - Never refer to images by filename\n      - Avoid including image URLs or markdown formatting\n      - Never name the character; always refer to them as \"the character in the image\"\n      - Never modify the outfit or item from the reference when the request is to \"wear\" something\n    \n      🔹 image_prompt (always required, even for video posts):\n        - Always begin with a sentence like: \"Have the character [in the given setting image, if it's provided], [[verb] with the item if it is provided].\". Note that if the setting or item is undefined, that means they're not provided and you should just skip them in this starting sentence. If a clothing item is provided, edit this starting sentence to say something like 'wearing the clothing that is provided\n        - subject: Based on character_image or character brief\n        - setting: Derived from setting_image or creative direction\n        - object: Based on item_image; describe interaction as per creative direction\n        - action: Focus on interaction with the object (e.g. \"posing with\", \"holding\", \"gesturing to\") — must reflect the request's context\n        - lighting: General description (e.g. \"natural light\", \"studio-lit\") — no color-based terms\n        - post_style: Aesthetic derived from creative direction and character brief (e.g. \"clean pastel editorial with digital polish\")\n\n      🔹 video_prompt (always required):\n        - subject: From character_image or character brief\n        - setting: From setting_image or creative direction\n        - action: Expressive movement, gesture, or behavior aligned with brief\n        - lighting: General, consistent with image prompt (e.g. \"professional studio lighting\")\n\nFor the following parameters, carefully look at the CREATIVE DIRECTION section of the user prompt and identify if the user is requesting for dialogue, music, and voice. If not, then say \"no dialogue\" or \"no music\" for these fields. Only refer to the CHARACTER BRIEF section of the prompt for the dialogue and music if the CREATIVE DIRECTION requests for these\n        - dialogue: If user provides one or requests for one in the Creative Direction section, include it. If not, use: \"no dialogue\"\n        - music: If user requests music in the Creative Direction section, include appropriate ambient music. If not, use: \"no music\"\n        - voice: If dialogue is provided or requested in Creative Direction, must be consistent with character brief. If not requested, use: \"no dialogue\"\n\n  - Dialogue should *never* sound robotic or \"AI-generated\" — it must reflect real, casual, off-the-cuff human language\n      - Maintain a consistent voice tone across all video prompts, unless instructed otherwise\n\n\n  E – Examples:\n    good_examples:\n      - {\n          \"posts\": {\n            \"post_1\": {\n              \"title\": \"soft launch\",\n              \"caption\": just me and my fave lil plush 🐰 #plushdrop #editorialenergy,\n              \"post_type\": \"image\",\n              \"image_prompt\": \"Have the character in the given setting image, posing with the item that is provided.\\nsubject: the character in the image holding a pastel plush with bunny ears\\nsetting: Neutral beige background\\nobject: Metallic pink designer mini handbag\\naction: Posing with plush while showing off its accessories\\nlighting: Soft indoor studio-lit\\npost_style: High-fashion editorial realism with digital polish\",\n              \"video_prompt\": \"not applicable\"\n            },\n            \"post_2\": {\n              \"title\": \"plush talk\",\n              \"caption\": can’t believe i said this on cam 💅 #irlstyle #vibesync,\n              \"post_type\": \"video\",\n              \"image_prompt\": \"Have the character in the given setting image, holding the item that is provided.\\nsubject: the character in the image seated with bunny plush in hand\\nsetting: Cozy studio with ambient lighting\\nobject: Plush toy with accessories\\naction: Holding the plush in lap and gesturing while seated\\nlighting: Basic indoor lighting setup\\npost_style: Editorial meets behind-the-scenes realness\",\n              \"video_prompt\": \"subject: the character in the image in full outfit, seated casually\\nsetting: Stylish indoor set with clean neutral tones\\naction: Talking to camera while playing with plush\\ndialogue: okay wait… this plush? actual fashion icon.\\nmusic: high-quality lo-fi background music\\nvoice: Australian accent, casual Gen Z tone, spontaneous and confident\\nlighting: Indoor studio lighting with soft setup\"\n            }\n          }\n        }\n    bad_examples:\n      - Missing required fields like post_type or post_style\n      - Descriptions using color-based lighting terms (e.g. “purple tones”)\n      - Formal or robotic dialogue in video_prompt\n      - Excluding image_prompt from video posts\n      - Using markdown formatting, triple quotes, or block-level code styles\n      - Referring to the character by name\n      - Referring to images by filename\n      - Omitting required music or voice fields from video prompt\n      - Altering the item or outfit from the reference\n\n  N – Notation:\n    format: JSON\n    example_output: |\n      {\n        \"posts\": {\n          \"post_1\": {\n            \"title\": \"soft launch\",\n            \"caption\": just me and my fave lil plush 🐰 #plushdrop #editorialenergy,\n            \"post_type\": \"image\",\n            \"image_prompt\": \"Have the character in the given setting image, posing with the item that is provided.\\nsubject: ...\\nsetting: ...\\nobject: ...\\naction: ...\\nlighting: ...\\npost_style: ...\",\n            \"video_prompt\": \"not applicable\"\n          },\n          \"post_2\": {\n            \"title\": \"plush talk\",\n            \"caption\": can’t believe i said this on cam 💅 #irlstyle #vibesync,\n            \"post_type\": \"video\",\n            \"image_prompt\": \"Have the character in the given setting image, holding the item that is provided.\\nsubject: ...\\nsetting: ...\\nobject: ...\\naction: ...\\nlighting: ...\\npost_style: ...\",\n            \"video_prompt\": \"subject: ...\\nsetting: ...\\naction: ...\\ndialogue: ...\\nmusic: ...\\nvoice: ...\\nlighting: ...\"\n          }\n        }\n      }\n\n  T – Tools:\n    - Think Tool: Use this to reflect on how the character, setting, creative direction, and user intent all combine to create consistent, high-quality prompts. Apply reasoning especially when reference images are missing or ambiguous.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "5881b153-f70e-4f51-a89d-32d82c0bb2cd",
+      "name": "characterRobo AI Agent",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -272
+      ],
+      "id": "26c0beb9-fb57-4ca8-9d38-0b2ddbbe716d",
+      "name": "GPT",
+      "credentials": {
+        "openAiApi": {
+          "id": "zDZ32auFKuRIohXt",
+          "name": "OpenAi account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"posts\": {\n    \"post_1\": {\n      \"title\": \"soft launch\",\n      \"caption\": \"just me and my fave lil plush 🐰 #plushdrop #editorialenergy\",\n      \"post_type\": \"image\",\n      \"image_prompt\": \"subject: ...\\nsetting: ...\\nobject: ...\\naction: ...\\ncamera: ...\\nlighting: ...\\npost_style: ...\",\n      \"video_prompt\": \"not applicable\"\n    },\n    \"post_2\": {\n      \"title\": \"plush talk\",\n      \"caption\": \"can’t believe i said this on cam 💅 #irlstyle #vibesync\",\n      \"post_type\": \"video\",\n      \"image_prompt\": \"subject: ...\\nsetting: ...\\nobject: ...\\naction: ...\\ncamera: ...\\nlighting: ...\\npost_style: ...\",\n      \"video_prompt\": \"subject: ...\\nsetting: ...\\naction: ...\\ndialogue: ...\\ncamera: ...\\nlighting: ...\\nvoice: ...\"\n    }\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -272
+      ],
+      "id": "42242d81-84d8-40a4-bb2d-832f8a25c0f7",
+      "name": "Structure"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sPhOq2jPkQpf7x43",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/sPhOq2jPkQpf7x43",
+          "cachedResultName": "(ao 2025.10.23) 🍳 Create Image (Nanobanana via Kie AI) copy"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "image_prompt": "={{ $json.image_prompt }}",
+            "image_1": "={{ $('Aggregate').item.json.downloadUrl[0] }}",
+            "image_2": "={{ $('Aggregate').item.json.downloadUrl[1] }}",
+            "image_3": "={{ $('Aggregate').item.json.downloadUrl[2] }}",
+            "aspect_ratio": "={{ $('Form').first().json['aspect ratio'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "image_prompt",
+              "displayName": "image_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "image_1",
+              "displayName": "image_1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "image_2",
+              "displayName": "image_2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "image_3",
+              "displayName": "image_3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "aspect_ratio",
+              "displayName": "aspect_ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        -128
+      ],
+      "id": "a026264c-7554-491e-a0a8-0933e3d39933",
+      "name": "Create Image"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM",
+          "mode": "list",
+          "cachedResultName": "AI Influencer Toolkit | R44",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557580637,
+          "mode": "list",
+          "cachedResultName": "Sheet1-posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit#gid=557580637"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $execution.id }}_{{ $('Split Out').item.json.title }}",
+            "title": "={{ $('Split Out').item.json.title }}",
+            "caption": "={{ $('Split Out').item.json.caption }}",
+            "image_output": "={{ $json.image_result }}",
+            "publish_status": "={{ $json.image_result && $json.image_result.includes('https://') ? 'scheduled' : 'error' }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_output",
+              "displayName": "image_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_output",
+              "displayName": "video_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publish_status",
+              "displayName": "publish_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -128
+      ],
+      "id": "871c1f77-a845-4082-9b1f-5c8dc9648728",
+      "name": "Log image",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "g0AeC1rxfS776mTE",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/g0AeC1rxfS776mTE",
+          "cachedResultName": "Veo3.1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_prompt": "={{ $('Split Out').item.json.video_prompt }}",
+            "image_url": "={{ $('Create Image').item.json.image_result }}",
+            "aspect_ratio": "={{ $('Form').first().json['aspect ratio'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "video_prompt",
+              "displayName": "video_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "aspect_ratio",
+              "displayName": "aspect_ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -128
+      ],
+      "name": "Create Video",
+      "id": "3e2a05ff-8066-4ebd-ae1b-112181c13f1b"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM",
+          "mode": "list",
+          "cachedResultName": "AI Influencer Toolkit | R44",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557580637,
+          "mode": "list",
+          "cachedResultName": "Sheet1-posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit#gid=557580637"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_output": "={{ $json.veo_video_result }}",
+            "publish_status": "={{ $json.veo_video_result && $json.veo_video_result.includes('https://') ? 'scheduled' : 'error' }}",
+            "id": "={{ $('Log image').item.json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_output",
+              "displayName": "image_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_output",
+              "displayName": "video_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publish_status",
+              "displayName": "publish_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        -128
+      ],
+      "id": "a3172de8-9f74-4710-85b5-25f791d4b50c",
+      "name": "Log video",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM",
+          "mode": "list",
+          "cachedResultName": "AI Influencer Toolkit | R44",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557580637,
+          "mode": "list",
+          "cachedResultName": "Sheet1-posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit#gid=557580637"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get post').item.json.row_number }}",
+            "publish_status": "done"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_output",
+              "displayName": "image_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_output",
+              "displayName": "video_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publish_status",
+              "displayName": "publish_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        496,
+        208
+      ],
+      "id": "e52077f0-2401-4b6b-8e89-7e920fa6b714",
+      "name": "Update post",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM",
+          "mode": "list",
+          "cachedResultName": "AI Influencer Toolkit | R44",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557580637,
+          "mode": "list",
+          "cachedResultName": "Sheet1-posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18nT63WfFLqak7DWRn3GZdWOx4-v51hUFF7DJbtAFBZM/edit#gid=557580637"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "publish_status",
+              "lookupValue": "scheduled"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        112,
+        208
+      ],
+      "id": "b7440a5c-585e-456c-a74e-5bae145dd64d",
+      "name": "Get post",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Image URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "characterRobo AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "characterRobo AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📷Instagram": {
+      "main": [
+        [
+          {
+            "node": "Update post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready in Blotato": {
+      "main": [
+        [
+          {
+            "node": "📷Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form": {
+      "main": [
+        [
+          {
+            "node": "Image1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Image2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Image3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Image3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Image URLs": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "characterRobo AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "characterRobo AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "characterRobo AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Log image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log image": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Log video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get post": {
+      "main": [
+        [
+          {
+            "node": "Ready in Blotato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ac438911-8a0f-4a2d-b02d-b271b79c030f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "addaa68bf5af965c06c3765c811549851eb65db8df4677e0c6253726ffcac493"
+  },
+  "id": "E6xd0icINRIB2mzB",
+  "tags": []
+}

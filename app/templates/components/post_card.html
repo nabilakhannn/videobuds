@@ -1,0 +1,57 @@
+{# Post Card Partial - Used for HTMX swapping in the calendar grid #}
+{# Expected context: post, campaign_id, day #}
+
+{% set status = post.status if post and post.status else 'draft' %}
+
+<div class="post-card bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-lg overflow-hidden cursor-pointer hover:border-gray-500"
+     hx-get="{{ url_for('posts.get_post', campaign_id=campaign_id, day=day) }}"
+     hx-target="#editor-content"
+     hx-swap="innerHTML"
+     onclick="openEditor(this, {{ day }})"
+     id="post-card-{{ day }}">
+    <!-- Thumbnail -->
+    <div class="aspect-square bg-gray-50 dark:bg-[#2A2A2A]/50 relative">
+        {% if post and post.image_url %}
+        <img src="{{ post.image_url }}" alt="Day {{ day }}"
+             class="w-full h-full object-cover"
+             loading="lazy">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center">
+            <span class="text-2xl font-bold text-gray-600">{{ day }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Status Dot -->
+        <div class="absolute top-1.5 right-1.5">
+            <span class="w-2.5 h-2.5 rounded-full block
+                        {{ 'bg-gray-500' if status == 'draft' else '' }}
+                        {{ 'bg-yellow-500 generating-pulse' if status == 'generating' else '' }}
+                        {{ 'bg-green-500' if status == 'generated' else '' }}
+                        {{ 'bg-[#F18523]' if status == 'approved' else '' }}
+                        {{ 'bg-red-500' if status == 'rejected' else '' }}"></span>
+        </div>
+
+        <!-- Day Badge -->
+        <div class="absolute top-1.5 left-1.5">
+            <span class="text-[10px] font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">
+                {{ day }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Caption Preview -->
+    <div class="p-1.5">
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight min-h-[24px]">
+            {% if post and post.caption %}
+            {{ post.caption[:60] }}{{ '...' if post.caption|length > 60 else '' }}
+            {% else %}
+            <span class="text-gray-600 italic">No caption</span>
+            {% endif %}
+        </p>
+        {% if post and post.content_pillar %}
+        <span class="inline-block mt-1 text-[9px] font-medium px-1 py-0.5 bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 rounded truncate max-w-full">
+            {{ post.content_pillar }}
+        </span>
+        {% endif %}
+    </div>
+</div>

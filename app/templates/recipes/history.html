@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Run History{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Run History</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Your past recipe executions</p>
+        </div>
+        <a href="{{ url_for('recipes.library') }}"
+           class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-[#F18523]/20">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            New Run
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{{ url_for('recipes.history') }}"
+           class="px-3 py-1.5 text-xs font-medium rounded-full transition-colors
+               {% if not status_filter and not slug_filter %}bg-[#F18523] text-white{% else %}bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#333]{% endif %}">
+            All
+        </a>
+        {% for st in ['completed', 'running', 'pending', 'failed'] %}
+        <a href="{{ url_for('recipes.history', status=st) }}"
+           class="px-3 py-1.5 text-xs font-medium rounded-full transition-colors
+               {% if status_filter == st %}bg-[#F18523] text-white{% else %}bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#333]{% endif %}">
+            {{ st|title }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Runs list -->
+    {% if runs %}
+    <div class="space-y-3">
+        {% for run in runs %}
+        {% set db_recipe = db_recipes.get(run.recipe_id) %}
+        {% set py_recipe = recipe_map.get(db_recipe.slug) if db_recipe else None %}
+        <a href="{{ url_for('recipes.run_status', run_id=run.id) }}"
+           class="block bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-4 hover:border-[#26A0D8]/40 dark:hover:border-[#26A0D8]/60 transition-all">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <!-- Icon -->
+                    <span class="text-xl">{{ py_recipe.icon if py_recipe else '🧪' }}</span>
+                    <!-- Name & time -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                            {{ db_recipe.name if db_recipe else 'Unknown Recipe' }}
+                        </h3>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">
+                            {{ run.created_at.strftime('%b %d, %Y at %I:%M %p') if run.created_at else '' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Progress -->
+                    {% if run.status in ('pending', 'running') %}
+                    <div class="w-20">
+                        <div class="w-full h-1.5 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
+                            <div class="h-full bg-[#F18523] rounded-full transition-all" style="width: {{ run.progress_pct }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Status badge -->
+                    {% if run.status == 'completed' %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                        ✓ Done
+                    </span>
+                    {% elif run.status == 'running' %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-[#F18523]/10 text-[#F18523]">
+                        Running
+                    </span>
+                    {% elif run.status == 'pending' %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+                        Pending
+                    </span>
+                    {% elif run.status == 'failed' %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                        Failed
+                    </span>
+                    {% elif run.status == 'cancelled' %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400">
+                        Cancelled
+                    </span>
+                    {% endif %}
+
+                    <!-- Arrow -->
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <div class="flex justify-center mt-8 space-x-2">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('recipes.history', page=pagination.prev_num, status=status_filter, recipe=slug_filter) }}"
+           class="px-3 py-2 text-sm bg-gray-100 dark:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-[#333]">
+            ← Previous
+        </a>
+        {% endif %}
+        <span class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+            Page {{ pagination.page }} of {{ pagination.pages }}
+        </span>
+        {% if pagination.has_next %}
+        <a href="{{ url_for('recipes.history', page=pagination.next_num, status=status_filter, recipe=slug_filter) }}"
+           class="px-3 py-2 text-sm bg-gray-100 dark:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-[#333]">
+            Next →
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-16">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-[#2A2A2A] flex items-center justify-center">
+            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No runs yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Pick a recipe and run it to see results here.</p>
+        <a href="{{ url_for('recipes.library') }}"
+           class="inline-flex items-center px-5 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+            Browse Recipes
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

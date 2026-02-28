@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Brands{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Brands</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your brand identities and style guides</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="{{ url_for('brands.questionnaire') }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Questionnaire
+            </a>
+            <a href="{{ url_for('brands.new_brand') }}"
+               class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-[#F18523]/20">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Brand
+            </a>
+        </div>
+    </div>
+
+    <!-- Brand Cards Grid -->
+    {% if brands_list %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for brand in brands_list %}
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl overflow-hidden hover:border-[#26A0D8]/30 dark:hover:border-[#26A0D8]/40 transition-all group">
+            <!-- Color Bar -->
+            <div class="h-1.5 flex">
+                {% if brand.colors %}
+                    {% for color in brand.colors[:3] %}
+                    <div class="flex-1" style="background-color: {{ color }};"></div>
+                    {% endfor %}
+                    {% if brand.colors|length < 3 %}
+                        {% for _ in range(3 - brand.colors|length) %}
+                        <div class="flex-1 bg-gray-100 dark:bg-[#2A2A2A]"></div>
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                <div class="flex-1 bg-[#26A0D8]"></div>
+                {% endif %}
+            </div>
+
+            <!-- Card Content -->
+            <a href="{{ url_for('brands.show_brand', brand_id=brand.id) }}" class="block p-5">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-300 transition-colors">
+                            {{ brand.name }}
+                        </h3>
+                        {% if brand.tagline %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{{ brand.tagline }}</p>
+                        {% endif %}
+                    </div>
+                    {% if active_brand and active_brand.id == brand.id %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20 ml-2 flex-shrink-0">
+                        Active
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Color Dots -->
+                {% if brand.colors %}
+                <div class="flex items-center space-x-1.5 mb-3">
+                    {% for color in brand.colors[:3] %}
+                    <span class="w-4 h-4 rounded-full border border-[#26A0D8]/30 dark:border-[#26A0D8]/40" style="background-color: {{ color }};"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Content Pillars -->
+                {% set pillars = brand.content_pillars|fromjson %}
+                {% if pillars %}
+                <div class="flex flex-wrap gap-1.5 mb-4">
+                    {% for pillar in pillars[:3] %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300">
+                        {{ pillar }}
+                    </span>
+                    {% endfor %}
+                    {% if pillars|length > 3 %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[#2A2A2A] text-gray-500">
+                        +{{ pillars|length - 3 }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </a>
+
+            <!-- Card Footer -->
+            <div class="px-5 py-3 border-t border-[#26A0D8]/20 dark:border-[#26A0D8]/40 flex items-center justify-between">
+                {% if active_brand and active_brand.id == brand.id %}
+                <span class="text-xs text-green-400 font-medium">Currently active</span>
+                {% else %}
+                <form method="POST" action="{{ url_for('brands.activate_brand', brand_id=brand.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                            class="text-xs text-[#F18523] hover:text-[#D97218] font-medium transition-colors">
+                        Activate
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{{ url_for('brands.show_brand', brand_id=brand.id) }}"
+                   class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    Edit
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination is defined %}
+    {% include "components/_pagination.html" %}
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-[#2A2A2A] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No brands yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+            Create your first brand to start building campaigns. You can set up a brand manually or use our AI-guided questionnaire.
+        </p>
+        <div class="flex items-center justify-center space-x-3">
+            <a href="{{ url_for('brands.questionnaire') }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 transition-colors">
+                Start Questionnaire
+            </a>
+            <a href="{{ url_for('brands.new_brand') }}"
+               class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+                Create Manually
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

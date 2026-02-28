@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Run — {{ recipe.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back link -->
+    <a href="{{ url_for('recipes.detail', slug=recipe.slug) }}"
+       class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-[#F18523] mb-6 transition-colors">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back to {{ recipe.name }}
+    </a>
+
+    <!-- Header -->
+    <div class="flex items-center space-x-3 mb-6">
+        <span class="text-3xl">{{ recipe.icon }}</span>
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Run {{ recipe.name }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the details below and click Generate.</p>
+        </div>
+    </div>
+
+    <!-- Error message -->
+    {% if error %}
+    <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <p class="text-sm text-red-700 dark:text-red-400">⚠️ {{ error }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Form -->
+    <form method="POST" enctype="multipart/form-data"
+          class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Brand & Persona Context (always visible) -->
+        <div class="mb-6 p-4 bg-[#26A0D8]/5 dark:bg-[#26A0D8]/10 border border-[#26A0D8]/20 dark:border-[#26A0D8]/30 rounded-lg">
+            <div class="flex items-center space-x-2 mb-4">
+                <svg class="w-5 h-5 text-[#26A0D8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">Brand &amp; Persona</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500 font-normal">— enriches AI output with your brand voice &amp; style</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="brand_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Brand
+                    </label>
+                    <select id="brand_id" name="brand_id"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors">
+                        <option value="">— No brand —</option>
+                        {% for b in brands %}
+                        <option value="{{ b.id }}">{{ b.name }}{% if b.tagline %} — {{ b.tagline }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    {% if not brands %}
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        <a href="{{ url_for('brands.create_brand') }}" class="text-[#26A0D8] hover:underline">+ Create a brand</a> to personalize outputs
+                    </p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="persona_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Persona
+                    </label>
+                    <select id="persona_id" name="persona_id"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors">
+                        <option value="">— No persona —</option>
+                        {% for p in personas %}
+                        <option value="{{ p.id }}">{{ p.name }}{% if p.tone %} ({{ p.tone }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    {% if not personas %}
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        <a href="{{ url_for('personas.index') }}" class="text-[#26A0D8] hover:underline">+ Create a persona</a> to set voice &amp; tone
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            {% for field in fields %}
+            <div>
+                <label for="{{ field.name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ field.label }}
+                    {% if not field.required %}
+                    <span class="text-xs text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
+                    {% endif %}
+                </label>
+
+                {% if field.field_type == 'text' %}
+                <input type="text"
+                       id="{{ field.name }}"
+                       name="{{ field.name }}"
+                       value="{{ old_inputs.get(field.name, field.default or '') if old_inputs else (field.default or '') }}"
+                       placeholder="{{ field.placeholder }}"
+                       maxlength="{{ config.MAX_TEXT_INPUT_LENGTH }}"
+                       {% if field.required %}required{% endif %}
+                       class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors">
+
+                {% elif field.field_type == 'textarea' %}
+                <textarea id="{{ field.name }}"
+                          name="{{ field.name }}"
+                          placeholder="{{ field.placeholder }}"
+                          rows="3"
+                          maxlength="{{ config.MAX_TEXTAREA_INPUT_LENGTH }}"
+                          {% if field.required %}required{% endif %}
+                          class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors resize-y">{{ old_inputs.get(field.name, '') if old_inputs else '' }}</textarea>
+
+                {% elif field.field_type == 'number' %}
+                <input type="number"
+                       id="{{ field.name }}"
+                       name="{{ field.name }}"
+                       value="{{ old_inputs.get(field.name, field.default or '') if old_inputs else (field.default or '') }}"
+                       {% if field.min_val is not none %}min="{{ field.min_val }}"{% endif %}
+                       {% if field.max_val is not none %}max="{{ field.max_val }}"{% endif %}
+                       {% if field.required %}required{% endif %}
+                       class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors">
+
+                {% elif field.field_type == 'select' %}
+                <select id="{{ field.name }}"
+                        name="{{ field.name }}"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#F18523] focus:border-transparent text-sm transition-colors">
+                    {% for opt in field.options %}
+                    <option value="{{ opt.value }}"
+                        {% if (old_inputs and old_inputs.get(field.name) == opt.value) or (not old_inputs and field.default == opt.value) %}selected{% endif %}>
+                        {{ opt.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                {% elif field.field_type == 'file' %}
+                <input type="file"
+                       id="{{ field.name }}"
+                       name="{{ field.name }}"
+                       {% if field.accept %}accept="{{ field.accept }}"{% endif %}
+                       {% if field.required %}required{% endif %}
+                       class="w-full text-sm text-gray-500 dark:text-gray-400
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0
+                              file:text-sm file:font-medium
+                              file:bg-[#F18523]/10 file:text-[#F18523]
+                              hover:file:bg-[#F18523]/20
+                              file:cursor-pointer cursor-pointer">
+
+                {% elif field.field_type == 'checkbox' %}
+                <div class="flex items-center">
+                    <input type="checkbox"
+                           id="{{ field.name }}"
+                           name="{{ field.name }}"
+                           value="1"
+                           {% if old_inputs and old_inputs.get(field.name) %}checked{% endif %}
+                           class="w-4 h-4 text-[#F18523] border-gray-300 dark:border-gray-600 rounded focus:ring-[#F18523]">
+                    <label for="{{ field.name }}" class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        {{ field.help_text or field.label }}
+                    </label>
+                </div>
+                {% endif %}
+
+                {% if field.help_text and field.field_type != 'checkbox' %}
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Steps preview -->
+        <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
+                What will happen ({{ steps|length }} steps):
+            </p>
+            <div class="flex flex-wrap gap-2">
+                {% for step in steps %}
+                <span class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-[#26A0D8]/10 dark:bg-[#26A0D8]/20 text-[#26A0D8]">
+                    {{ loop.index }}. {{ step }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="mt-6 flex items-center justify-end space-x-3">
+            <a href="{{ url_for('recipes.detail', slug=recipe.slug) }}"
+               class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="inline-flex items-center px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-[#F18523]/20">
+                <svg class="w-4 h-4 mr-2 animate-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Generate
+            </button>
+        </div>
+    </form>
+</div>
+
+{# ── Client-side conditional validation (Talking Avatar: script OR brief) ── #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form[method="POST"]');
+    if (!form) return;
+
+    var scriptField = form.querySelector('#script');
+    var briefField  = form.querySelector('#brief');
+
+    // Only apply when both fields exist (Talking Avatar)
+    if (!scriptField || !briefField) return;
+
+    form.addEventListener('submit', function(e) {
+        var scriptVal = (scriptField.value || '').trim();
+        var briefVal  = (briefField.value || '').trim();
+
+        if (!scriptVal && !briefVal) {
+            e.preventDefault();
+            // Show a friendly validation message
+            var existing = document.getElementById('client-validation-msg');
+            if (existing) existing.remove();
+
+            var msg = document.createElement('div');
+            msg.id = 'client-validation-msg';
+            msg.className = 'mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-800 rounded-lg';
+            msg.innerHTML = '<p class="text-sm text-yellow-700 dark:text-yellow-400">⚠️ Please fill in either the <strong>Script</strong> (what the person should say) or the <strong>AI Script Brief</strong> (let AI write it for you).</p>';
+
+            // Insert before the form
+            form.parentNode.insertBefore(msg, form);
+            msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Highlight both fields
+            scriptField.classList.add('ring-2', 'ring-yellow-400');
+            briefField.classList.add('ring-2', 'ring-yellow-400');
+            setTimeout(function() {
+                scriptField.classList.remove('ring-2', 'ring-yellow-400');
+                briefField.classList.remove('ring-2', 'ring-yellow-400');
+            }, 3000);
+        }
+    });
+});
+</script>
+{% endblock %}

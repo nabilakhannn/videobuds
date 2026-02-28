@@ -1,0 +1,519 @@
+{# Partial: run progress card — rendered inline or via HTMX poll #}
+
+<div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6 mb-6">
+    <!-- Status badge -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+            {% if run.status == 'pending' %}
+            <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+            </span>
+            <span class="text-sm font-medium text-yellow-700 dark:text-yellow-400">Waiting to start…</span>
+            {% elif run.status == 'running' %}
+            <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F18523] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#F18523]"></span>
+            </span>
+            <span class="text-sm font-medium text-[#F18523]">Running…</span>
+            {% elif run.status == 'awaiting_approval' %}
+            <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#26A0D8] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#26A0D8]"></span>
+            </span>
+            <span class="text-sm font-medium text-[#26A0D8]">Awaiting your approval</span>
+            {% elif run.status == 'completed' %}
+            <span class="inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            <span class="text-sm font-medium text-green-700 dark:text-green-400">Completed</span>
+            {% elif run.status == 'failed' %}
+            <span class="inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            <span class="text-sm font-medium text-red-700 dark:text-red-400">Failed</span>
+            {% elif run.status == 'cancelled' %}
+            <span class="inline-flex rounded-full h-3 w-3 bg-gray-400"></span>
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Cancelled</span>
+            {% endif %}
+        </div>
+        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ run.progress_pct }}%</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="w-full h-2 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden mb-3">
+        <div class="h-full bg-[#F18523] rounded-full transition-all duration-500 ease-out"
+             style="width: {{ run.progress_pct }}%"></div>
+    </div>
+
+    <!-- Current step -->
+    {% if run.current_step_label %}
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+        Step {{ run.steps_completed + 1 }} of {{ run.total_steps }} — {{ run.current_step_label }}
+    </p>
+    {% endif %}
+
+    <!-- Step list -->
+    {% if recipe %}
+    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
+        {% for step in recipe.get_steps() %}
+        <div class="flex items-center space-x-2">
+            {% if loop.index0 < run.steps_completed %}
+            <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm text-gray-500 dark:text-gray-400 line-through">{{ step }}</span>
+            {% elif loop.index0 == run.steps_completed and run.status in ('running', 'awaiting_approval') %}
+            {% if run.status == 'awaiting_approval' %}
+            <svg class="w-4 h-4 text-[#26A0D8] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span class="text-sm font-medium text-[#26A0D8]">{{ step }} — review below ↓</span>
+            {% else %}
+            <svg class="w-4 h-4 text-[#F18523] flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ step }}</span>
+            {% endif %}
+            {% else %}
+            <div class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"></div>
+            <span class="text-sm text-gray-400 dark:text-gray-500">{{ step }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Error message -->
+{% if run.status == 'failed' and run.error_message %}
+<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-5 mb-6">
+    <h3 class="text-sm font-medium text-red-800 dark:text-red-400 mb-1">Error</h3>
+    <p class="text-sm text-red-700 dark:text-red-300">{{ run.error_message }}</p>
+</div>
+{% endif %}
+
+{# ════════════════════════════════════════════════════════════════════════ #}
+{# AWAITING APPROVAL — Script review & edit UI                             #}
+{# ════════════════════════════════════════════════════════════════════════ #}
+{% if run.status == 'awaiting_approval' and run.outputs %}
+<div class="bg-white dark:bg-[#1E1E1E] border-2 border-[#26A0D8]/40 dark:border-[#26A0D8]/60 rounded-xl p-6 mb-6">
+    <div class="flex items-center space-x-2 mb-4">
+        <svg class="w-5 h-5 text-[#26A0D8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Review & Approve Script</h3>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        The AI has analysed your product and written creative scenes. Review the script below —
+        you can <strong>edit any field</strong> before approving. No images or videos will be
+        generated until you click <strong>"Approve & Generate"</strong>.
+    </p>
+
+    {# ── Product Analysis (read-only, rendered markdown) ── #}
+    {% for output in run.outputs %}
+    {% if output.get('type') == 'text' and output.get('value') %}
+    <details class="p-4 bg-gray-50 dark:bg-[#141414] rounded-lg mb-5 group" open>
+        <summary class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-white flex items-center justify-between">
+            <span class="flex items-center"><span class="mr-2">🔍</span>{{ output.get('label', output.get('title', 'Analysis')) }}</span>
+            <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </summary>
+        <div class="mt-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none">
+            {{ output.value | simple_md | safe }}
+        </div>
+    </details>
+    {% endif %}
+    {% endfor %}
+
+    {# ── Editable scenes form ── #}
+    <form method="POST" action="{{ url_for('recipes.approve_script', run_id=run.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% set scene_outputs = [] %}
+        {% for output in run.outputs %}
+            {% if output.get('type') == 'scene' %}
+                {% if scene_outputs.append(output) %}{% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="hidden" name="scene_count" value="{{ scene_outputs|length }}">
+
+        {% for scene in scene_outputs %}
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-4 bg-gray-50/50 dark:bg-[#141414]/50">
+            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3">
+                🎬 Scene {{ scene.get('index', loop.index0) + 1 }}
+            </h4>
+
+            {# Scene description #}
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Scene Description (image prompt)
+            </label>
+            <textarea name="scene_{{ loop.index0 }}_description"
+                      rows="3"
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1E1E1E] text-sm text-gray-900 dark:text-white p-3 mb-3 focus:ring-2 focus:ring-[#26A0D8] focus:border-transparent resize-y"
+                      >{{ scene.get('scene_description', '') }}</textarea>
+
+            {# Video motion #}
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Video Motion / Camera Movement
+            </label>
+            <input type="text"
+                   name="scene_{{ loop.index0 }}_motion"
+                   value="{{ scene.get('video_motion', '') }}"
+                   class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1E1E1E] text-sm text-gray-900 dark:text-white p-3 mb-3 focus:ring-2 focus:ring-[#26A0D8] focus:border-transparent">
+
+            {# Ad copy #}
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Ad Copy / Caption
+            </label>
+            <input type="text"
+                   name="scene_{{ loop.index0 }}_ad_copy"
+                   value="{{ scene.get('ad_copy', '') }}"
+                   class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1E1E1E] text-sm text-gray-900 dark:text-white p-3 focus:ring-2 focus:ring-[#26A0D8] focus:border-transparent">
+        </div>
+        {% endfor %}
+
+        {# Submit button #}
+        <div class="flex items-center space-x-3 mt-5">
+            <button type="submit"
+                    class="inline-flex items-center px-6 py-3 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-[#F18523]/20 focus:ring-2 focus:ring-[#F18523] focus:ring-offset-2">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Approve & Generate Videos
+            </button>
+            <span class="text-xs text-gray-400 dark:text-gray-500">
+                This will generate images and videos — may take 2-5 minutes.
+            </span>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{# ════════════════════════════════════════════════════════════════════════ #}
+{# COMPLETED — Final results display                                       #}
+{# ════════════════════════════════════════════════════════════════════════ #}
+{% if run.status == 'completed' and run.outputs %}
+<div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Results</h3>
+    <div class="space-y-4">
+        {% for output in run.outputs %}
+
+        {# ── Text output (analysis, scripts, captions — rendered markdown) ── #}
+        {% if output.get('type') == 'text' and output.get('value') %}
+        <details class="p-4 bg-gray-50 dark:bg-[#141414] rounded-lg group" open>
+            <summary class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-white flex items-center justify-between">
+                {{ output.get('label', output.get('title', 'Output')) }}
+                <div class="flex items-center space-x-2">
+                    <button type="button"
+                            onclick="event.stopPropagation(); toggleEditor({{ loop.index0 }})"
+                            class="inline-flex items-center px-2.5 py-1 text-[11px] font-medium bg-[#26A0D8]/10 text-[#26A0D8] rounded-full hover:bg-[#26A0D8]/20 transition-colors"
+                            title="Edit this output with AI">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                        </svg>
+                        Edit with AI
+                    </button>
+                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </summary>
+            <div id="editor-rendered-{{ loop.index0 }}" class="mt-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none">
+                {{ output.value | simple_md | safe }}
+            </div>
+
+            {# ── AI Editor panel (hidden by default) ── #}
+            {% set idx = loop.index0 %}
+            {% include "recipes/_content_editor.html" %}
+        </details>
+
+        {# ── Scene metadata (editable scenes from approval phase) ── #}
+        {% elif output.get('type') == 'scene' %}
+        <details class="p-4 bg-gray-50 dark:bg-[#141414] rounded-lg group">
+            <summary class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-white flex items-center justify-between">
+                📝 {{ output.get('label', output.get('title', 'Scene')) }}: {{ output.get('ad_copy', '')[:60] }}
+                <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </summary>
+            <div class="mt-3 space-y-2 text-sm">
+                <p class="text-gray-600 dark:text-gray-300"><strong>Description:</strong> {{ output.get('scene_description', '') }}</p>
+                <p class="text-gray-600 dark:text-gray-300"><strong>Motion:</strong> {{ output.get('video_motion', '') }}</p>
+                <p class="text-gray-600 dark:text-gray-300"><strong>Ad Copy:</strong> {{ output.get('ad_copy', '') }}</p>
+            </div>
+        </details>
+
+        {# ── Media output (image + video + download) ── #}
+        {% elif output.get('url') or output.get('image_url') %}
+        <div class="p-4 bg-gray-50 dark:bg-[#141414] rounded-lg">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">{{ output.get('label', output.get('title', 'Output ' ~ loop.index)) }}</h4>
+
+            {# Scene ad copy #}
+            {% if output.get('scene', {}).get('ad_copy') %}
+            <p class="text-sm text-gray-500 dark:text-gray-400 italic mb-3">"{{ output.scene.ad_copy }}"</p>
+            {% endif %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                {# Inline image preview (image_url for scene-based or url for standalone images) #}
+                {% if output.get('image_url') %}
+                <div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">Scene Image</p>
+                    <img src="{{ output.image_url }}" alt="{{ output.get('label', output.get('title', 'Scene image')) }}"
+                         class="rounded-lg w-full max-h-64 object-cover border border-gray-200 dark:border-gray-700"
+                         loading="lazy">
+                </div>
+                {% elif output.get('url') and output.get('type') == 'image' %}
+                <div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">Generated Image</p>
+                    <img src="{{ output.url }}" alt="{{ output.get('label', output.get('title', 'Generated image')) }}"
+                         class="rounded-lg w-full max-h-64 object-cover border border-gray-200 dark:border-gray-700"
+                         loading="lazy">
+                </div>
+                {% endif %}
+
+                {# Inline video player #}
+                {% if output.get('url') and output.get('type') == 'video' %}
+                <div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">Generated Video</p>
+                    <video controls playsinline preload="auto"
+                           class="rounded-lg w-full max-h-64 border border-gray-200 dark:border-gray-700">
+                        <source src="{{ output.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Warning banner for partial failures (e.g. image OK but video failed) #}
+            {% if output.get('value') and 'error' in (output.get('value', '')|lower) %}
+            <div class="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-start space-x-2">
+                <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+                <p class="text-xs text-yellow-700 dark:text-yellow-300">{{ output.value }}</p>
+            </div>
+            {% endif %}
+
+            {# Download links #}
+            <div class="flex flex-wrap gap-2">
+                {% if output.get('url') %}
+                <a href="{{ output.url }}" target="_blank" download
+                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-[#F18523] hover:bg-[#D97218] text-white rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download {{ output.get('type', 'file')|title }}
+                </a>
+                {% endif %}
+                {% if output.get('image_url') and output.get('image_url') != output.get('url') %}
+                <a href="{{ output.image_url }}" target="_blank" download
+                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors">
+                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download Image
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ── Error / plain text fallback ── #}
+        {% elif output.get('value') %}
+        <div class="flex items-start justify-between p-3 bg-gray-50 dark:bg-[#141414] rounded-lg">
+            <span class="text-sm text-gray-700 dark:text-gray-300 font-medium mr-2">{{ output.get('label', output.get('title', 'Output ' ~ loop.index)) }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400 text-right">{{ output.value[:200] }}{% if output.value|length > 200 %}…{% endif %}</span>
+        </div>
+
+        {# ── Simple label-only output ── #}
+        {% else %}
+        <div class="p-3 bg-gray-50 dark:bg-[#141414] rounded-lg">
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ output.get('label', output.get('title', 'Output ' ~ loop.index)) }}</span>
+        </div>
+        {% endif %}
+
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Actions -->
+{% if run.status in ('completed', 'failed', 'cancelled') %}
+<div class="flex items-center space-x-3">
+    {% if recipe %}
+    <a href="{{ url_for('recipes.run', slug=recipe.slug) }}"
+       class="inline-flex items-center px-5 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-[#F18523]/20">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Run Again
+    </a>
+    {% endif %}
+    <a href="{{ url_for('recipes.history') }}"
+       class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+        View History
+    </a>
+</div>
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════════════ #}
+{#  AI Editor JavaScript (only loaded when run is completed)               #}
+{# ═══════════════════════════════════════════════════════════════════════ #}
+{% if run.status == 'completed' %}
+<script>
+(function() {
+    // Per-editor conversation history (client-side only)
+    const editorHistory = {};
+
+    // Populate textarea with raw content when editor opens
+    const outputData = {{ run.outputs | tojson }};
+
+    window.toggleEditor = function(idx) {
+        const panel = document.getElementById('editor-panel-' + idx);
+        if (!panel) return;
+
+        const isHidden = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+
+        if (isHidden) {
+            // Seed the textarea with the raw text from the output.
+            // idx matches the Jinja loop index over run.outputs,
+            // so outputData[idx] is the correct element.
+            const textarea = document.getElementById('editor-content-' + idx);
+            if (textarea && textarea.value.trim() === '') {
+                const entry = outputData[idx];
+                if (entry && entry.type === 'text' && entry.value) {
+                    textarea.value = entry.value;
+                }
+            }
+            // Focus the instruction input
+            const input = document.getElementById('editor-input-' + idx);
+            if (input) input.focus();
+        }
+    };
+
+    window.editorQuickAction = function(idx, instruction) {
+        const input = document.getElementById('editor-input-' + idx);
+        if (input) {
+            input.value = instruction;
+            sendEditorChat(idx);
+        }
+    };
+
+    window.sendEditorChat = function(idx) {
+        const contentEl = document.getElementById('editor-content-' + idx);
+        const inputEl = document.getElementById('editor-input-' + idx);
+        const sendBtn = document.getElementById('editor-send-' + idx);
+        const loadingEl = document.getElementById('editor-loading-' + idx);
+        const historyEl = document.getElementById('editor-history-' + idx);
+        const explanationEl = document.getElementById('editor-explanation-' + idx);
+        const explanationTextEl = document.getElementById('editor-explanation-text-' + idx);
+
+        if (!contentEl || !inputEl) return;
+
+        const content = contentEl.value.trim();
+        const instruction = inputEl.value.trim();
+
+        if (!content) { alert('No content to edit.'); return; }
+        if (!instruction) { alert('Please type an editing instruction.'); return; }
+
+        // Get brand/persona from selectors
+        const brandSelect = document.getElementById('editor-brand-' + idx);
+        const personaSelect = document.getElementById('editor-persona-' + idx);
+        const brandId = brandSelect ? parseInt(brandSelect.value) || null : null;
+        const personaId = personaSelect ? parseInt(personaSelect.value) || null : null;
+
+        // Build history
+        if (!editorHistory[idx]) editorHistory[idx] = [];
+
+        // UI feedback
+        sendBtn.disabled = true;
+        loadingEl.classList.remove('hidden');
+        explanationEl.classList.add('hidden');
+
+        // Add user turn to history display
+        const userBubble = document.createElement('div');
+        userBubble.className = 'flex justify-end';
+        userBubble.innerHTML = '<div class="max-w-[80%] px-3 py-2 bg-[#F18523]/10 text-[#F18523] text-xs rounded-lg rounded-br-none">' +
+            instruction.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+        historyEl.appendChild(userBubble);
+        historyEl.scrollTop = historyEl.scrollHeight;
+
+        inputEl.value = '';
+
+        // Call API
+        fetch('/api/recipes/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                content: content,
+                instruction: instruction,
+                brand_id: brandId,
+                persona_id: personaId,
+                history: editorHistory[idx],
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            loadingEl.classList.add('hidden');
+            sendBtn.disabled = false;
+
+            if (data.status === 'ok') {
+                // Update content
+                contentEl.value = data.refined_content;
+
+                // Update the rendered preview too
+                const renderedEl = document.getElementById('editor-rendered-' + idx);
+                if (renderedEl) {
+                    // Simple markdown-to-HTML for preview (basic)
+                    renderedEl.innerHTML = simpleMarkdown(data.refined_content);
+                }
+
+                // Show explanation
+                explanationTextEl.textContent = data.explanation;
+                explanationEl.classList.remove('hidden');
+
+                // Add assistant turn to history display
+                const aiBubble = document.createElement('div');
+                aiBubble.className = 'flex justify-start';
+                aiBubble.innerHTML = '<div class="max-w-[80%] px-3 py-2 bg-[#26A0D8]/10 text-[#26A0D8] text-xs rounded-lg rounded-bl-none">' +
+                    data.explanation.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                historyEl.appendChild(aiBubble);
+                historyEl.scrollTop = historyEl.scrollHeight;
+
+                // Track conversation
+                editorHistory[idx].push({role: 'user', text: instruction});
+                editorHistory[idx].push({role: 'assistant', text: data.explanation});
+            } else {
+                alert(data.message || 'Something went wrong.');
+            }
+        })
+        .catch(err => {
+            loadingEl.classList.add('hidden');
+            sendBtn.disabled = false;
+            alert('Network error — please try again.');
+            console.error(err);
+        });
+    };
+
+    // Minimal client-side markdown→HTML for preview updates
+    function simpleMarkdown(text) {
+        return text
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/^- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/^/, '<p>').replace(/$/, '</p>');
+    }
+})();
+</script>
+{% endif %}

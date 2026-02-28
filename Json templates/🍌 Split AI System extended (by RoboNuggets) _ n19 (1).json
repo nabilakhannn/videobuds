@@ -1,0 +1,1921 @@
+{
+  "name": "🍌 Split AI System extended (by RoboNuggets) | n19",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        416
+      ],
+      "id": "cfce0ab8-e783-4f7c-ad71-2f36ae2d5dba",
+      "name": "Telegram Trigger",
+      "webhookId": "a7347cd2-a89c-4c5f-afd0-9e95a8cf065d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pzInIPWCmzUAL9tS",
+          "name": "robotutorials_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $('Set Bot ID').item.json['bot id'] }}/getFile?file_id={{ $('Telegram Trigger').first(0,0).json.message.photo[2].file_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2192,
+        416
+      ],
+      "id": "fd013994-ff70-4a3a-a5d9-a2287d6c388b",
+      "name": "Get Img Path"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "text": "Analyze the given image and determine if it primarily depicts a product or a character, or BOTH.\n\n- If the image is of a product, return the analysis in YAML format with the following fields:\n\nbrand_name: (Name of the brand shown in the image, if visible or inferable)\ncolor_scheme:\n  - hex: (Hex code of each prominent color used)\n    name: (Descriptive name of the color)\nfont_style: (Describe the font family or style used: serif/sans-serif, bold/thin, etc.)\nvisual_description: (A full sentence or two summarizing what is seen in the image, ignoring the background)\n\n- If the image is of a character, return the analysis in YAML format with the following fields:\n\ncharacter_name: (Name of the character if visible or inferable)\ncolor_scheme:\n  - hex: (Hex code of each prominent color used on the character)\n    name: (Descriptive name of the color)\noutfit_style: (Description of clothing style, accessories, or notable features)\nvisual_description: (A full sentence or two summarizing what the character looks like, ignoring the background)\n\nOnly return the YAML. Do not explain or add any other comments.\n\n\n- if it is BOTH, return both descriptions as guided above in YAML format\n",
+        "imageUrls": "=https://api.telegram.org/file/bot{{ $('Set Bot ID').item.json['bot id'] }}/{{ $json.result.file_path }}",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2352,
+        416
+      ],
+      "id": "b63e40df-8251-415e-9c0f-c2c9ddc91b2a",
+      "name": "Describe Img",
+      "credentials": {
+        "openAiApi": {
+          "id": "zDZ32auFKuRIohXt",
+          "name": "OpenAi account 5"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        656
+      ],
+      "id": "fb025aa2-53e6-43e9-a9c8-95494e667447",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2368,
+        656
+      ],
+      "id": "68e641ec-67ad-489b-bee8-c4f88a230705",
+      "name": "GPT",
+      "credentials": {
+        "openAiApi": {
+          "id": "zDZ32auFKuRIohXt",
+          "name": "OpenAi account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "493c3932-bd76-4de4-baee-87ad3590751d",
+              "name": "bot id",
+              "value": "your bot token here",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        416
+      ],
+      "id": "2d04e4f9-39f0-42a7-954f-75985ea7e281",
+      "name": "Set Bot ID"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "Got it! I'm now creating your request 🍳",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2992,
+        416
+      ],
+      "id": "1676599c-4546-4869-aa8e-58d8f26de0a2",
+      "name": "Tell User WIP",
+      "webhookId": "887a2d40-985d-4114-a933-74a1b2b420d8",
+      "credentials": {
+        "telegramApi": {
+          "id": "pzInIPWCmzUAL9tS",
+          "name": "robotutorials_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc",
+          "mode": "list",
+          "cachedResultName": "R39 | 100 Ads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "image_status",
+              "lookupValue": "create"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        416
+      ],
+      "id": "c62186c2-bd93-4781-b78c-5bb4dd1d9e48",
+      "name": "Get Rows to Create",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"image_prompt\": \"full prompt here with all required elements inline. No line breaks, no extra double quotes\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2720,
+        656
+      ],
+      "id": "8d09cc7b-1607-4f77-98f8-38eb344aa437",
+      "name": "Structured Output"
+    },
+    {
+      "parameters": {
+        "content": "## START: Image Input Section",
+        "width": 272,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        416
+      ],
+      "id": "37457926-f813-48aa-b1a0-7f54fc0a465e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## AGENT: Prompt Splitter",
+        "width": 512,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        592
+      ],
+      "id": "9b635e70-a8b1-4769-abcf-c789ee4ab7e1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# 🍌Nanobanana Split AI System - Extended (by RoboNuggets 🥚)\n## Author: Jay E",
+        "height": 192,
+        "width": 1840,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        240
+      ],
+      "id": "e46764a7-cf01-4e29-b8dd-e228843a4a39",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc",
+          "mode": "list",
+          "cachedResultName": "R39 | 100 Ads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "index": "={{ $('Get Rows to Create').item.json.index }}",
+            "image_status": "done",
+            "image_name": "={{ $json.name }}"
+          },
+          "matchingColumns": [
+            "index"
+          ],
+          "schema": [
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_copy",
+              "displayName": "ad_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "character",
+              "displayName": "character",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visual_guide",
+              "displayName": "visual_guide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text_watermark",
+              "displayName": "text_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "1_color",
+              "displayName": "1_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "2_color",
+              "displayName": "2_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "3_color",
+              "displayName": "3_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_status",
+              "displayName": "image_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_name",
+              "displayName": "image_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_status",
+              "displayName": "video_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_prompt",
+              "displayName": "video_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_aspectratio",
+              "displayName": "video_aspectratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_name",
+              "displayName": "video_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        864
+      ],
+      "id": "177aee0f-7ade-4bdd-83db-b7c0d93cadb7",
+      "name": "Update Row as Done",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc",
+          "mode": "list",
+          "cachedResultName": "R39 | 100 Ads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "index": "={{ $('Get Rows to Create').item.json.index }}",
+            "image_status": "error",
+            "image_name": "={{ $json.data.failMsg }}"
+          },
+          "matchingColumns": [
+            "index"
+          ],
+          "schema": [
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_copy",
+              "displayName": "ad_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "character",
+              "displayName": "character",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visual_guide",
+              "displayName": "visual_guide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text_watermark",
+              "displayName": "text_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "1_color",
+              "displayName": "1_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "2_color",
+              "displayName": "2_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "3_color",
+              "displayName": "3_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_status",
+              "displayName": "image_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_name",
+              "displayName": "image_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_status",
+              "displayName": "video_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_prompt",
+              "displayName": "video_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_aspectratio",
+              "displayName": "video_aspectratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_name",
+              "displayName": "video_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        736
+      ],
+      "id": "6e95699d-c37c-4135-8d3c-16e8116ac35b",
+      "name": "Update Row as Error",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Your task: Create 1 image prompt as guided by your system guidelines.\n\n\n***\n\nThe user's special request:\n{{ $('Telegram Trigger').first().json.message.caption }}\n\n***\nDescription of the reference image:\n{{ $('Describe Img').first().json.choices[0].message.content }}\n\n**  \nELEMENTS FOR THIS IMAGE:\n\nproduct: {{ $json.product }}\n\ncharacter: {{ $json.character }}\n\nad copy: {{ $json.ad_copy }}\n\nvisual_guide: {{ $json.visual_guide }}  \n\ntext_watermark: {{ $json.text_watermark }}\n\nPrimary color: {{ $json[\"1_color\"] }}  \nSecondary color: {{ $json[\"2_color\"] }}  \nTertiary color: {{ $json[\"3_color\"] }}  \n\n\n\n***\nUse the Think tool to double check your output for this run",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=system_prompt: |\n  ## SYSTEM PROMPT: 🍳 Image Ad Prompt Generator Agent\n\n🟠 A – Ask:\n    Create exactly 1 structured image ad prompt with all required fields filled.\n\nThe final prompt should be written like this:\n\n\"\"\"\nMake an image ad for this product with the following elements. The product looks exactly like what's in the reference image.\n\nproduct: \ncharacter: \nad_copy: \nvisual_guide: \ntext_watermark: \ntext_watermark_location: \nPrimary color of ad:\nSecondary color of ad: \nTertiary color of ad: \n\n\"\"\"\"\n\n\n🟠 G – Guidance:\n    role: Creative ad prompt engineer\n    output_count: 1\n\n    constraints: \n      - Always include all required fields.\n      - Integrate the user's special request as faithfully as you can in the final image prompt\n      - If user input is missing, apply smart defaults:\n        • text_watermark_location → \"bottom left of screen\"\n        • primary_color → say \"decide based on the image provided\"\n        • secondary_color → say \"decide based on the image provided\"\n        • tertiary_color → say \"decide based on the image provided\"\n        • font_style → say \"decide based on the image provided\"\n        • ad_copy → keep short, punchy, action-oriented (max 7 words)\n\n      - If ad copy is set to null, none, no text, or something similar, then do not include an ad copy text in the final image.\n\n\n      - If text_watermark is set to null, none, no text, or something similar, then do not include a watermark text in the final image.\n\n      - NEVER include any extra text apart from the ad copy and watermark unless specified by the user. \n\n      - NEVER alter the color or any part of the product sent\n\n      - If a design peg is provided by the user, adjust the colors in their description to fit the color palette provided by the user\n\n\n\n\n\n\n🟠 E – Examples:\n     good_examples:\n      - character: (as defined by the user)\n        ad_copy: (as defined by the user, or decide on your own if not provided)\n        visual_guide: (as defined by the user. If the user's special request is detailed, expand this portion to accommodate their request. Make sure the color palette that is provided is respected even in this portion. If the request involves a human character, define the camera angle and camera used.  If no visual guide is given, describe placement of the character and how big they are relative to the image; describe what they're doing with the product; describe the style of the ad, describe the main color of the background and the main color of the text.)\n        text_watermark: (as defined by the user, leave blank if none provided)\n        text_watermark_location: (as defined by the user, or bottom left if none provided)\n        primary_color: (as defined by the user)\n        secondary_color: (as defined by the user)\n        tertiary_color: (as defined by the user)\n\n\n\n🟠 N – Notation:\n    format: text string nested within an \"image_prompt\" parameter. Avoid using double-quotes or new line breaks\n    example_output: |\n      {\n        \"image_prompt: \"final prompt here\"\n      }\n\n\n\n🟠 T – Tools:\n    - Think Tool: Use this to reflect and reason before responding.",
+          "batching": {
+            "batchSize": 1,
+            "delayBetweenBatches": 3000
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        640
+      ],
+      "id": "aa7f2ade-0acc-41e1-a08f-d54986cf881d",
+      "name": "splitRobo AI Agent"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/veo/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"prompt\":\"{{ $('Get Rows to Create').item.json.video_prompt }}\",\n  \"model\": \"veo3_fast\",\n  \"aspectRatio\": \"{{ $('Get Rows to Create').item.json.video_aspectratio }}\",\n  \"imageUrls\": \"{{ JSON.parse($('Get Image').item.json.data.resultJson).resultUrls[0] }}\"\n}\n\n",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        1184
+      ],
+      "id": "5973ac36-b846-472e-a04a-7cc65da3a75e",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GY8EwBg1KMzSwh9X",
+          "name": "Kie AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2192,
+        1184
+      ],
+      "id": "594712dc-5cc1-431e-9f40-7881195929ae",
+      "name": "Wait 2",
+      "webhookId": "6831d9a2-576d-49cb-8f28-4faeeae50b14"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/nano-banana-edit\",\n  \"input\": {\n    \"prompt\": \"{{ $json.output.image_prompt.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\",\n    \"image_urls\": [\n      \"https://api.telegram.org/file/bot{{ $('Set Bot ID').first().json['bot id'] }}/{{ $('Get Img Path').first().json.result.file_path }}\"\n    ],\n    \"output_format\": \"png\",\n    \"image_size\": \"auto\",\n    \"enable_translation\": false\n  }\n}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        864
+      ],
+      "id": "05f088f6-fd70-4898-8469-f653c6b8ee5d",
+      "name": "Create Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GY8EwBg1KMzSwh9X",
+          "name": "Kie AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2192,
+        864
+      ],
+      "id": "3b8bec9f-6172-4d27-8e9c-22317ac01bb2",
+      "name": "Wait",
+      "webhookId": "9b7a27b6-ff8d-41b3-89c2-80cf788a581f"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bcea5446-3c91-491a-9d85-83720588f327",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "fail",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bf05a398-eb00-4e25-8de6-3ae7d10e69dd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4686d0f8-4428-4d81-9c40-c9d56b69ab02",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "ing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "in progress"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 0
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2592,
+        848
+      ],
+      "id": "6dc62f05-58a7-4301-9890-32396c7292ef",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $('Create Image').item.json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        864
+      ],
+      "id": "199fefda-f2d5-4c26-858a-dd9838529933",
+      "name": "Get Image",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GY8EwBg1KMzSwh9X",
+          "name": "Kie AI Credential"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ JSON.parse($json.data.resultJson).resultUrls[0] }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2848,
+        864
+      ],
+      "id": "613efaaf-1a07-4335-8c80-e94dab26e952",
+      "name": "Load Image File"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc",
+          "mode": "list",
+          "cachedResultName": "R39 | 100 Ads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "index": "={{ $('Get Rows to Create').item.json.index }}",
+            "video_status": "done",
+            "video_name": "={{ $json.name }}"
+          },
+          "matchingColumns": [
+            "index"
+          ],
+          "schema": [
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_copy",
+              "displayName": "ad_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "character",
+              "displayName": "character",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visual_guide",
+              "displayName": "visual_guide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text_watermark",
+              "displayName": "text_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "1_color",
+              "displayName": "1_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "2_color",
+              "displayName": "2_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "3_color",
+              "displayName": "3_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_status",
+              "displayName": "image_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_name",
+              "displayName": "image_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_status",
+              "displayName": "video_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_prompt",
+              "displayName": "video_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_aspectratio",
+              "displayName": "video_aspectratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_name",
+              "displayName": "video_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        1184
+      ],
+      "id": "d37369c1-a2f3-43fd-9abe-0129c86dfab9",
+      "name": "Update Row as Done1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc",
+          "mode": "list",
+          "cachedResultName": "R39 | 100 Ads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v2urk2p3OLGwyQU9lasYD9ffbDFQnyp4F1wdUgxPYlc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "index": "={{ $('Get Rows to Create').item.json.index }}",
+            "video_status": "error",
+            "video_name": "={{ $json.data.errorMessage }}"
+          },
+          "matchingColumns": [
+            "index"
+          ],
+          "schema": [
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_copy",
+              "displayName": "ad_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "character",
+              "displayName": "character",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visual_guide",
+              "displayName": "visual_guide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text_watermark",
+              "displayName": "text_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "1_color",
+              "displayName": "1_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "2_color",
+              "displayName": "2_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "3_color",
+              "displayName": "3_color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_status",
+              "displayName": "image_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_name",
+              "displayName": "image_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_status",
+              "displayName": "video_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_prompt",
+              "displayName": "video_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_aspectratio",
+              "displayName": "video_aspectratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_name",
+              "displayName": "video_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        1056
+      ],
+      "id": "3886d1d6-3770-4fea-b8f1-ddf09c01a2d4",
+      "name": "Update Row as Error1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/veo/record-info",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $('Create Video').item.json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        1184
+      ],
+      "id": "6bd41149-39d0-4cb2-9d26-2b8308a5e4e5",
+      "name": "Get Video",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GY8EwBg1KMzSwh9X",
+          "name": "Kie AI Credential"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "33856ccc-6169-44c4-b086-d0cb34a20091",
+                    "leftValue": "={{ $json.data.successFlag }}",
+                    "rightValue": 3,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data.successFlag }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "957f40c4-00b8-4caa-9bd7-065dcaf2cb49"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "52ad92ea-901f-4af8-a462-84b045dd2803",
+                    "leftValue": "={{ $json.data.successFlag }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "in progress"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 0
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2592,
+        1168
+      ],
+      "id": "98c2b55c-7029-411c-a087-73fcda51b4d4",
+      "name": "Switch 2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "822b4a37-5ac6-4334-8a6d-96043f29ce9a",
+              "leftValue": "={{ $('Get Rows to Create').item.json.video_status }}",
+              "rightValue": "create",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        1184
+      ],
+      "id": "e9bf60d1-75f4-4ab1-a4bd-a9ee043ccc17",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "## END: Image Output Section",
+        "height": 256,
+        "width": 256,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        768
+      ],
+      "id": "215b4dc9-6dc2-4c94-b841-46bf8fe5bddd",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## OPTIONAL: Video Output Section",
+        "height": 256,
+        "width": 256,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1040
+      ],
+      "id": "27dd788b-e81f-4460-9ec1-893ef943d74c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.response.resultUrls[0] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2848,
+        1184
+      ],
+      "id": "06b70b4f-d2f7-45ee-a36d-79dc99da7501",
+      "name": "Load Video File"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('Get Rows to Create').item.json.index }}_{{ $('Get Rows to Create').item.json.ad_copy }}_{{ $('Create Image').item.json.data.taskId }}.png",
+        "binaryData": true,
+        "parentId": "box-folder-id-here"
+      },
+      "type": "n8n-nodes-base.box",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        864
+      ],
+      "id": "253cccfb-03dc-4770-922c-d86786e32c25",
+      "name": "Upload Image",
+      "credentials": {
+        "boxOAuth2Api": {
+          "id": "z1F7fuocI0Mht5WE",
+          "name": "Box account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('Get Rows to Create').item.json.index }}_{{ $('Get Rows to Create').item.json.ad_copy }}_{{ $('Create Video').item.json.data.taskId }}.mp4",
+        "binaryData": true,
+        "parentId": "box-folder-id-here"
+      },
+      "type": "n8n-nodes-base.box",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        1184
+      ],
+      "id": "4f2efc02-3722-4ad2-887e-90deeae5b89e",
+      "name": "Upload Video",
+      "credentials": {
+        "boxOAuth2Api": {
+          "id": "z1F7fuocI0Mht5WE",
+          "name": "Box account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "Done! I've now uploaded those to your files 🥚",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3328,
+        1184
+      ],
+      "id": "4d2796dc-f889-494a-9f16-46fae86d9f33",
+      "name": "Tell User Done1",
+      "webhookId": "0b063d31-63d0-42db-99a1-557db78d939d",
+      "executeOnce": true,
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "pzInIPWCmzUAL9tS",
+          "name": "robotutorials_bot"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Bot ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Img Path": {
+      "main": [
+        [
+          {
+            "node": "Describe Img",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe Img": {
+      "main": [
+        [
+          {
+            "node": "Tell User WIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "splitRobo AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "splitRobo AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Bot ID": {
+      "main": [
+        [
+          {
+            "node": "Get Img Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tell User WIP": {
+      "main": [
+        [
+          {
+            "node": "Get Rows to Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Rows to Create": {
+      "main": [
+        [
+          {
+            "node": "splitRobo AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "splitRobo AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Row as Done": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "splitRobo AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update Row as Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load Image File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Load Image File": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Switch 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch 2": {
+      "main": [
+        [
+          {
+            "node": "Update Row as Error1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load Video File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Video File": {
+      "main": [
+        [
+          {
+            "node": "Upload Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Update Row as Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video": {
+      "main": [
+        [
+          {
+            "node": "Update Row as Done1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Row as Done1": {
+      "main": [
+        [
+          {
+            "node": "Tell User Done1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33452fea-5e54-4a01-888d-208f609b494f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "addaa68bf5af965c06c3765c811549851eb65db8df4677e0c6253726ffcac493"
+  },
+  "id": "0naGmiPWx5szevaz",
+  "tags": []
+}

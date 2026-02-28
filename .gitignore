@@ -1,0 +1,52 @@
+# ── Python ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Virtual environments ───────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Environment / secrets ──────────────────────────────────────────
+.env
+.env.*
+!.env.example
+references/.env
+
+# ── SQLite databases ───────────────────────────────────────────────
+*.db
+instance/
+
+# ── IDE / Editor ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Generated assets (large binaries) ─────────────────────────────
+references/outputs/
+app/static/generated/
+app/static/uploads/
+
+# ── Node (compound-engineering-plugin) ─────────────────────────────
+node_modules/
+bun.lock
+
+# ── Reference folders (not part of the app) ──────────────────────
+compound-engineering-plugin-main/
+create apps from n8n workflows:agents/
+Screenshot*.png
+
+# ── Misc ───────────────────────────────────────────────────────────
+*.log
+.cursor/
+.claude/

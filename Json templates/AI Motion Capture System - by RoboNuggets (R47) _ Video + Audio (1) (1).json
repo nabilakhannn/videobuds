@@ -1,0 +1,749 @@
+{
+  "name": "AI Motion Capture System - by RoboNuggets (R47) | Video + Audio",
+  "nodes": [
+    {
+      "parameters": {
+        "amount": 180
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1648,
+        640
+      ],
+      "id": "e31e7247-99c6-407d-b1bb-0e3ebf197848",
+      "name": "Wait2",
+      "webhookId": "76bbb413-a79c-4faa-8f85-deb84a292aa0"
+    },
+    {
+      "parameters": {
+        "amount": 600
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1648,
+        304
+      ],
+      "id": "86501125-b595-43dd-9cf5-9433d2903bed",
+      "name": "Wait4",
+      "webhookId": "08411b5f-8da8-4880-b0ee-dac2a17276c4"
+    },
+    {
+      "parameters": {
+        "amount": 120
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        480
+      ],
+      "id": "29197a4d-e261-49a8-9c0e-17044a107742",
+      "name": "Wait5",
+      "webhookId": "dfb226fc-df67-4de5-913b-967b5b2779fc"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2016,
+        480
+      ],
+      "id": "c5a99512-ef4f-42b3-b88a-202ce93df866",
+      "name": "Merge",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "content": "## INPUT",
+        "height": 240,
+        "width": 182,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        784,
+        416
+      ],
+      "id": "bba4d4b4-8314-4e83-b280-a1dcf61b2789",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## OUTPUT",
+        "height": 240,
+        "width": 198,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        416
+      ],
+      "id": "75cf08de-f2cc-44fa-8e34-27d86135c393",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# AI Motion Capture (by RoboNuggets)\n## Author: Jay E | R47",
+        "height": 736,
+        "width": 272,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        16
+      ],
+      "id": "07d41110-4b0a-4a83-ad71-4a34979c8d4a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## TRANSFORM VIDEO",
+        "height": 256,
+        "width": 470,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        240
+      ],
+      "id": "9deafbe6-b28a-46cf-8243-de1abc36218d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## TRANSFORM AUDIO",
+        "height": 272,
+        "width": 470,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        560
+      ],
+      "id": "86998baa-dd4f-40ef-bf79-80c8c2111481",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Step 1: SEPARATE AUDIO & VIDEO",
+        "height": 240,
+        "width": 422,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        416
+      ],
+      "id": "9f8fd3de-0cc9-44dc-b669-98c8a356fdbf",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Step 3: COMBINE AUDIO & VIDEO",
+        "height": 240,
+        "width": 486,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        416
+      ],
+      "id": "07d9686a-fe2b-48cb-a0f8-47373a99aa78",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "amount": 120
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        480
+      ],
+      "id": "251a6e32-903c-4408-8012-0353f3780fa8",
+      "name": "Wait",
+      "webhookId": "313815c3-dff9-4140-8309-c3c6558e2a5a"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        288,
+        272
+      ],
+      "id": "ea3d39ac-a6e7-472b-878f-c8cd32dfa573",
+      "name": "Execute"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8",
+          "mode": "list",
+          "cachedResultName": "Wan animate",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1705232927,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit#gid=1705232927"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "create"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        480
+      ],
+      "id": "09eae1b5-14e4-4fed-a519-c519abdd47fd",
+      "name": "INPUT",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8",
+          "mode": "list",
+          "cachedResultName": "Wan animate",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1705232927,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1r1s5Iqo9Ggu4w5ESSYyoX3g9PeyNHw3QgT7bz4vblG8/edit#gid=1705232927"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "output": "={{ $json.video.url }}",
+            "status": "done",
+            "row_number": "={{ $('INPUT').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "char",
+              "displayName": "char",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "driving video",
+              "displayName": "driving video",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image reference",
+              "displayName": "image reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audio reference",
+              "displayName": "audio reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2528,
+        480
+      ],
+      "id": "248dea7d-e7cb-460d-be6e-65c21e14bf96",
+      "name": "OUTPUT",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WmDBwEhcrLeG9D67",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.replicate.com/v1/models/lucataco/extract-audio/predictions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"input\": {\n      \"video\": \"{{ $json['driving video'] }}\",\n      \"fade_in\": 0,\n      \"fade_out\": 0,\n      \"trim_end\": 0,\n      \"trim_start\": 0,\n      \"volume_boost\": 1,\n      \"audio_quality\": \"high\",\n      \"output_format\": \"mp3\",\n      \"noise_reduction\": false,\n      \"normalize_audio\": false\n    }\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        480
+      ],
+      "id": "e05a21b1-c874-4223-a552-d269e55ffb1c",
+      "name": "Separate",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "i8H2diwPTpPXyKzU",
+          "name": "Replicate Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urls.get }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1264,
+        480
+      ],
+      "id": "16e31e79-55c4-4738-8c6c-bf197b91cc74",
+      "name": "Get",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "i8H2diwPTpPXyKzU",
+          "name": "Replicate Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/chatterbox/speech-to-speech",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"source_audio_url\": \"{{ $json.output }}\",\n  \"target_voice_audio_url\": \"{{ $('INPUT').item.json['audio reference'] }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        640
+      ],
+      "id": "3e7ce5aa-dc00-4cb6-b891-855eab0d9785",
+      "name": "Transform Audio",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://queue.fal.run/fal-ai/wan/v2.2-14b/animate/{{ $('INPUT').item.json.type }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_url\": \"{{ $('INPUT').item.json['driving video'] }}\",\n  \"image_url\": \"{{ $('INPUT').item.json['image reference'] }}\",\n  \"guidance_scale\": 1,\n  \"resolution\": \"720p\",\n  \"num_inference_steps\": 6,\n  \"enable_safety_checker\": true,\n  \"enable_output_safety_checker\": false,\n  \"shift\": 8,\n  \"video_quality\": \"maximum\",\n  \"video_write_mode\": \"balanced\",\n  \"use_turbo\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        304
+      ],
+      "id": "3da81a4a-c039-4f53-85e0-080376f881a2",
+      "name": "Transform Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1776,
+        304
+      ],
+      "id": "19643a72-feaa-4626-ab12-ca4ef82c0f4f",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1776,
+        640
+      ],
+      "id": "e68e4de2-d5dd-4868-97d9-16d35fb51193",
+      "name": "Get Audio",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/ffmpeg-api/merge-audio-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_url\": \"{{ $json.video.url }}\",\n  \"audio_url\": \"{{ $json.audio.url }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2128,
+        480
+      ],
+      "id": "42c0e18e-cf5d-4519-b2de-32fa2591a248",
+      "name": "Combine",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        480
+      ],
+      "id": "22932fb8-853e-4bc8-b1e2-1c08de93fc5c",
+      "name": "Get Final",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8us2N7EU77ApbiYP",
+          "name": "Fal AI Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Get Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait5": {
+      "main": [
+        [
+          {
+            "node": "Get Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Combine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute": {
+      "main": [
+        [
+          {
+            "node": "INPUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INPUT": {
+      "main": [
+        [
+          {
+            "node": "Separate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "main": [
+        [
+          {
+            "node": "Transform Audio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transform Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Audio": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Video": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine": {
+      "main": [
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Final": {
+      "main": [
+        [
+          {
+            "node": "OUTPUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3faf2593-0a4c-44bf-b63e-cf18f96465b6",
+  "meta": {
+    "instanceId": "addaa68bf5af965c06c3765c811549851eb65db8df4677e0c6253726ffcac493"
+  },
+  "id": "D1PkSaLArU1fGpr3",
+  "tags": []
+}

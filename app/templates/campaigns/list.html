@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Campaigns{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Campaigns</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">
+                {% if active_brand %}
+                Campaigns for <span class="text-[#F18523] font-medium">{{ active_brand.name }}</span>
+                {% else %}
+                Manage your content campaigns
+                {% endif %}
+            </p>
+        </div>
+        <a href="{{ url_for('campaigns.new_campaign') }}"
+           class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-[#F18523]/20">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            New Campaign
+        </a>
+    </div>
+
+    <!-- Campaign Cards -->
+    {% if campaigns_list %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for campaign in campaigns_list %}
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl overflow-hidden hover:border-[#26A0D8]/30 dark:hover:border-[#26A0D8]/40 transition-all group">
+            <!-- Status Bar -->
+            <div class="h-1
+                        {{ 'bg-gray-300 dark:bg-gray-600' if campaign.status == 'draft' else '' }}
+                        {{ 'bg-yellow-500' if campaign.status == 'generating' else '' }}
+                        {{ 'bg-green-500' if campaign.status == 'generated' else '' }}
+                        {{ 'bg-[#F18523]' if campaign.status == 'approved' else '' }}
+                        {{ 'bg-amber-400' if campaign.status == 'exported' else '' }}
+                        {{ 'bg-gray-300 dark:bg-gray-600' if not campaign.status else '' }}"></div>
+
+            <!-- Card Content -->
+            <div class="p-5">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#D97218] transition-colors">
+                            {{ campaign.name }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            {% if campaign.start_date %}
+                            {{ campaign.start_date.strftime('%b %d') }} - {{ (campaign.start_date + timedelta(days=campaign.post_count - 1)).strftime('%b %d, %Y') if timedelta else campaign.start_date.strftime('%b %d, %Y') }}
+                            {% else %}
+                            No dates set
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ml-2 flex-shrink-0
+                                {{ 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' if campaign.status == 'draft' else '' }}
+                                {{ 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' if campaign.status == 'generating' else '' }}
+                                {{ 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400' if campaign.status == 'generated' else '' }}
+                                {{ 'bg-[#F18523]/10 text-[#F18523]' if campaign.status == 'approved' else '' }}
+                                {{ 'bg-amber-100 dark:bg-amber-400/10 text-amber-700 dark:text-amber-400' if campaign.status == 'exported' else '' }}
+                                {{ 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' if not campaign.status else '' }}">
+                        {{ campaign.status|capitalize if campaign.status else 'Draft' }}
+                    </span>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="text-center p-2 bg-gray-50 dark:bg-[#2A2A2A]/50 rounded-lg">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ campaign.post_count or 30 }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Posts</p>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 dark:bg-[#2A2A2A]/50 rounded-lg">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ campaign.generated_count or 0 }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Generated</p>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 dark:bg-[#2A2A2A]/50 rounded-lg">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">${{ '%.2f'|format(campaign.total_cost or 0) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Cost</p>
+                    </div>
+                </div>
+
+                <!-- Style Preset -->
+                {% if campaign.style_preset %}
+                <div class="flex items-center space-x-1.5 mb-4">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300">
+                        {{ campaign.style_preset }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="flex items-center space-x-2">
+                    <a href="{{ url_for('campaigns.calendar', campaign_id=campaign.id) }}"
+                       class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-[#F18523]/10 hover:bg-[#F18523]/20 text-[#F18523] text-sm font-medium rounded-lg border border-[#F18523]/20 transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        View Calendar
+                    </a>
+                    {% if campaign.status == 'approved' or campaign.status == 'generated' %}
+                    <a href="{{ url_for('export.preview', campaign_id=campaign.id) }}"
+                       class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-600 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination is defined %}
+    {% include "components/_pagination.html" %}
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-[#2A2A2A] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No campaigns yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+            {% if active_brand %}
+            Create your first campaign for <span class="text-[#F18523]">{{ active_brand.name }}</span> to start generating content.
+            {% else %}
+            Select a brand first, then create a campaign to start generating content.
+            {% endif %}
+        </p>
+        {% if active_brand %}
+        <a href="{{ url_for('campaigns.new_campaign') }}"
+           class="inline-flex items-center px-5 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create First Campaign
+        </a>
+        {% else %}
+        <a href="{{ url_for('brands.list_brands') }}"
+           class="inline-flex items-center px-5 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+            Select a Brand First
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">
+                {% if active_brand %}
+                    Managing <span class="text-[#F18523] font-semibold">{{ active_brand.name }}</span>
+                {% else %}
+                    Welcome back, {{ current_user.display_name or 'there' }}. Stop guessing. Start scaling.
+                {% endif %}
+            </p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="{{ url_for('brands.new_brand') }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg border border-[#26A0D8]/20 dark:border-[#26A0D8]/30 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Brand
+            </a>
+            <a href="{{ url_for('campaigns.new_campaign') }}"
+               class="inline-flex items-center px-4 py-2 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-[#F18523]/20">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Campaign
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Total Brands -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Brands</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total_brands if stats else 0 }}</p>
+                </div>
+                <div class="w-12 h-12 bg-pink-400/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Campaigns -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Campaigns</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total_campaigns if stats else 0 }}</p>
+                </div>
+                <div class="w-12 h-12 bg-[#26A0D8]/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#26A0D8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Images Generated -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Images Generated</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.images_generated if stats else 0 }}</p>
+                </div>
+                <div class="w-12 h-12 bg-amber-400/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Spent -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        {% if current_user.is_admin %}Actual Cost{% else %}Total Spent{% endif %}
+                    </p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">${{ '%.2f'|format(stats.total_spent if stats else 0) }}</p>
+                </div>
+                <div class="w-12 h-12 bg-[#F18523]/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#F18523]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent Campaigns -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-[#26A0D8]/20 dark:border-[#26A0D8]/30">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Campaigns</h2>
+                    <a href="{{ url_for('campaigns.list_campaigns') }}" class="text-sm text-[#F18523] hover:text-[#D97218] transition-colors">
+                        View all
+                    </a>
+                </div>
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    {% if recent_campaigns %}
+                    {% for campaign in recent_campaigns %}
+                    <a href="{{ url_for('campaigns.calendar', campaign_id=campaign.id) }}"
+                       class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#2A2A2A]/50 transition-colors group">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-[#26A0D8]/10 rounded-lg flex items-center justify-center group-hover:bg-[#26A0D8]/20 transition-colors">
+                                <svg class="w-5 h-5 text-[#26A0D8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800 dark:text-white group-hover:text-[#F18523] transition-colors">{{ campaign.name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ campaign.start_date.strftime('%b %d') if campaign.start_date else 'No date' }}
+                                    &middot; {{ campaign.post_count }} posts
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {{ 'bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-gray-300' if campaign.status == 'draft' else '' }}
+                                        {{ 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' if campaign.status == 'generating' else '' }}
+                                        {{ 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' if campaign.status == 'generated' else '' }}
+                                        {{ 'bg-[#26A0D8]/10 text-[#26A0D8]' if campaign.status == 'approved' else '' }}
+                                        {{ 'bg-[#F18523]/10 text-[#F18523]' if campaign.status == 'exported' else '' }}">
+                                {{ campaign.status|capitalize if campaign.status else 'Draft' }}
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <div class="px-6 py-12 text-center">
+                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">No campaigns yet</p>
+                        <a href="{{ url_for('campaigns.new_campaign') }}" class="inline-flex items-center mt-3 text-sm text-[#F18523] hover:text-[#D97218]">
+                            Create your first campaign
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions + Active Brand Info -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+                <div class="space-y-3">
+                    <a href="{{ url_for('brands.new_brand') }}"
+                       class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition-colors group">
+                        <div class="w-10 h-10 bg-pink-400/10 rounded-lg flex items-center justify-center group-hover:bg-pink-400/20 transition-colors">
+                            <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-200">New Brand</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Create a brand manually</p>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('brands.questionnaire') }}"
+                       class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition-colors group">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Brand Questionnaire</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">AI-guided brand setup</p>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('campaigns.new_campaign') }}"
+                       class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-[#2A2A2A]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition-colors group">
+                        <div class="w-10 h-10 bg-[#26A0D8]/10 rounded-lg flex items-center justify-center group-hover:bg-[#26A0D8]/20 transition-colors">
+                            <svg class="w-5 h-5 text-[#26A0D8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-200">New Campaign</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Plan 30 days of content</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Active Brand -->
+            {% if active_brand %}
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Active Brand</h2>
+                    <a href="{{ url_for('brands.show_brand', brand_id=active_brand.id) }}" class="text-sm text-[#F18523] hover:text-[#D97218] transition-colors">Edit</a>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="flex -space-x-1">
+                            {% for color in active_brand.colors[:3] if active_brand.colors %}
+                            <span class="w-5 h-5 rounded-full border-2 border-white dark:border-[#1E1E1E]" style="background-color: {{ color }};"></span>
+                            {% endfor %}
+                        </div>
+                        <h3 class="text-base font-medium text-gray-900 dark:text-white">{{ active_brand.name }}</h3>
+                    </div>
+                    {% if active_brand.tagline %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ active_brand.tagline }}</p>
+                    {% endif %}
+                    {% set pillars = active_brand.content_pillars|fromjson %}
+                    {% if pillars %}
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for pillar in pillars[:5] %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300">
+                            {{ pillar }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Photo Library — {{ brand.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('brands.show_brand', brand_id=brand.id) }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mb-4 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to {{ brand.name }}
+        </a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Photo Library</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">Upload your product photos, team images, and inspiration for <span class="text-[#F18523] font-medium">{{ brand.name }}</span></p>
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ (product_photos|length) + (personal_photos|length) + (inspiration_photos|length) }} photos total
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Categories -->
+    <div class="space-y-8">
+
+        <!-- Product Photos -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-[#F18523]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Product Photos</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Your products, packaging, details — used in product-focused campaigns</p>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-500 bg-gray-100 dark:bg-[#2A2A2A] px-2 py-1 rounded-full">{{ product_photos|length }} photos</span>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="mb-4">
+                <label class="flex items-center justify-center w-full h-24 border-2 border-dashed border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg cursor-pointer
+                              hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors"
+                       ondragover="event.preventDefault(); this.classList.add('border-blue-500', 'bg-blue-500/10')"
+                       ondragleave="this.classList.remove('border-blue-500', 'bg-blue-500/10')"
+                       ondrop="handleDrop(event, 'product', {{ brand.id }})">
+                    <div class="text-center">
+                        <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Click or drag to upload product photos</span>
+                    </div>
+                    <input type="file" class="hidden" accept="image/*" multiple
+                           onchange="uploadFiles(this.files, 'product', {{ brand.id }})">
+                </label>
+            </div>
+
+            <!-- Photo Grid -->
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2" id="product-grid">
+                {% for photo in product_photos %}
+                <div class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-[#2A2A2A]" id="photo-{{ photo.id }}">
+                    {% set parts = photo.file_path.split('/brand_photos/') %}
+                    <img src="/static/uploads/brand_photos/{{ parts[-1] if parts|length > 1 else '' }}"
+                         class="w-full h-full object-cover" alt="Product photo">
+                    <button onclick="deletePhoto({{ photo.id }}, this)"
+                            class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center
+                                   opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Personal & Team Photos -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-pink-500/10 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Personal & Team</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Headshots, team photos, behind-the-scenes — used for UGC and personal brand posts</p>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-500 bg-gray-100 dark:bg-[#2A2A2A] px-2 py-1 rounded-full">{{ personal_photos|length }} photos</span>
+            </div>
+
+            <div class="mb-4">
+                <label class="flex items-center justify-center w-full h-24 border-2 border-dashed border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg cursor-pointer
+                              hover:border-pink-500/50 hover:bg-pink-500/5 transition-colors"
+                       ondragover="event.preventDefault(); this.classList.add('border-pink-500', 'bg-pink-500/10')"
+                       ondragleave="this.classList.remove('border-pink-500', 'bg-pink-500/10')"
+                       ondrop="handleDrop(event, 'personal', {{ brand.id }})">
+                    <div class="text-center">
+                        <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Click or drag to upload personal/team photos</span>
+                    </div>
+                    <input type="file" class="hidden" accept="image/*" multiple
+                           onchange="uploadFiles(this.files, 'personal', {{ brand.id }})">
+                </label>
+            </div>
+
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2" id="personal-grid">
+                {% for photo in personal_photos %}
+                <div class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-[#2A2A2A]" id="photo-{{ photo.id }}">
+                    {% set parts = photo.file_path.split('/brand_photos/') %}
+                    <img src="/static/uploads/brand_photos/{{ parts[-1] if parts|length > 1 else '' }}"
+                         class="w-full h-full object-cover" alt="Personal photo">
+                    <button onclick="deletePhoto({{ photo.id }}, this)"
+                            class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center
+                                   opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Inspiration -->
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Inspiration</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Mood board images, style references, competitor examples — guides the AI visual direction</p>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-500 bg-gray-100 dark:bg-[#2A2A2A] px-2 py-1 rounded-full">{{ inspiration_photos|length }} photos</span>
+            </div>
+
+            <div class="mb-4">
+                <label class="flex items-center justify-center w-full h-24 border-2 border-dashed border-[#26A0D8]/30 dark:border-[#26A0D8]/40 rounded-lg cursor-pointer
+                              hover:border-orange-500/50 hover:bg-orange-500/5 transition-colors"
+                       ondragover="event.preventDefault(); this.classList.add('border-orange-500', 'bg-orange-500/10')"
+                       ondragleave="this.classList.remove('border-orange-500', 'bg-orange-500/10')"
+                       ondrop="handleDrop(event, 'inspiration', {{ brand.id }})">
+                    <div class="text-center">
+                        <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Click or drag to upload inspiration images</span>
+                    </div>
+                    <input type="file" class="hidden" accept="image/*" multiple
+                           onchange="uploadFiles(this.files, 'inspiration', {{ brand.id }})">
+                </label>
+            </div>
+
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2" id="inspiration-grid">
+                {% for photo in inspiration_photos %}
+                <div class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-[#2A2A2A]" id="photo-{{ photo.id }}">
+                    {% set parts = photo.file_path.split('/brand_photos/') %}
+                    <img src="/static/uploads/brand_photos/{{ parts[-1] if parts|length > 1 else '' }}"
+                         class="w-full h-full object-cover" alt="Inspiration">
+                    <button onclick="deletePhoto({{ photo.id }}, this)"
+                            class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center
+                                   opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function uploadFiles(files, purpose, brandId) {
+    for (var i = 0; i < files.length; i++) {
+        var formData = new FormData();
+        formData.append('file', files[i]);
+        formData.append('purpose', purpose);
+
+        fetch('/api/brands/' + brandId + '/photos/upload', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(function(resp) {
+            if (!resp.ok) throw new Error('Upload failed (HTTP ' + resp.status + ')');
+            return resp.json();
+        })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                // Add new photo to the grid
+                var grid = document.getElementById(data.purpose + '-grid');
+                var div = document.createElement('div');
+                div.className = 'group relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-[#2A2A2A]';
+                div.id = 'photo-' + data.id;
+                div.innerHTML = '<img src="' + data.url + '" class="w-full h-full object-cover" alt="Photo">' +
+                    '<button onclick="deletePhoto(' + data.id + ', this)" ' +
+                    'class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">' +
+                    '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
+                    '</svg></button>';
+                grid.appendChild(div);
+            } else {
+                alert('Upload error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(function(err) { alert(err.message); });
+    }
+}
+
+function handleDrop(event, purpose, brandId) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('border-blue-500', 'border-pink-500', 'border-orange-500',
+                                          'bg-blue-500/10', 'bg-pink-500/10', 'bg-orange-500/10');
+    if (event.dataTransfer.files.length > 0) {
+        uploadFiles(event.dataTransfer.files, purpose, brandId);
+    }
+}
+
+function deletePhoto(photoId, btn) {
+    if (!confirm('Delete this photo?')) return;
+    fetch('/api/photos/' + photoId + '/delete', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(resp) {
+        if (!resp.ok) throw new Error('Delete failed (HTTP ' + resp.status + ')');
+        return resp.json();
+    })
+    .then(function(data) {
+        if (data.status === 'ok') {
+            var el = document.getElementById('photo-' + photoId);
+            if (el) el.remove();
+        }
+    })
+    .catch(function(err) { alert(err.message); });
+}
+</script>
+{% endblock %}

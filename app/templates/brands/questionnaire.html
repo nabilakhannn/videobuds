@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}Create Your Brand{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('brands.list_brands') }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mb-4 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Brands
+        </a>
+        <div class="flex items-center space-x-3 mb-2">
+            <div class="w-10 h-10 bg-[#F18523] rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create Your Brand</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Tell us the basics — AI will research and build everything else</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-4 mb-8">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2 text-xs font-medium" id="step-ind-1">
+                <span class="flex items-center justify-center w-6 h-6 bg-[#F18523] text-white rounded-full">1</span>
+                <span class="text-[#F18523]">Basics</span>
+            </div>
+            <div class="flex-1 h-px bg-gray-200 dark:bg-[#333]"></div>
+            <div class="flex items-center space-x-2 text-xs font-medium" id="step-ind-2">
+                <span class="flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-gray-300 rounded-full">2</span>
+                <span class="text-gray-500 dark:text-gray-400">Quick Picks</span>
+            </div>
+            <div class="flex-1 h-px bg-gray-200 dark:bg-[#333]"></div>
+            <div class="flex items-center space-x-2 text-xs font-medium" id="step-ind-3">
+                <span class="flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-gray-300 rounded-full">3</span>
+                <span class="text-gray-500 dark:text-gray-400">Research Sources</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{ url_for('brands.process_questionnaire') }}" id="brand-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Hidden fields for chip selections -->
+        <input type="hidden" name="industry" id="industry-input" value="">
+        <input type="hidden" name="visual_vibe" id="visual_vibe-input" value="">
+        <input type="hidden" name="target_audience" id="target_audience-input" value="">
+
+        <!-- STEP 1: Basics -->
+        <div id="step-1" class="space-y-6">
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span class="flex items-center justify-center w-7 h-7 bg-[#F18523]/20 text-[#F18523] text-xs font-bold rounded-lg">1</span>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Tell us about your brand</h2>
+                </div>
+                <div class="space-y-5">
+                    <div>
+                        <label for="brand_name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                            Brand Name <span class="text-red-400">*</span>
+                        </label>
+                        <input type="text" id="brand_name" name="brand_name" required
+                               class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                      focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                               placeholder="What is your brand called?">
+                    </div>
+                    <div>
+                        <label for="brand_description" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                            What does your brand do? <span class="text-red-400">*</span>
+                        </label>
+                        <textarea id="brand_description" name="brand_description" rows="3" required
+                                  class="w-full px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                         focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors resize-none"
+                                  placeholder="Describe your business in 1-2 sentences. e.g., 'We sell handmade candles inspired by travel destinations' or 'I'm a fitness coach helping busy professionals get in shape'"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="goToStep(2)"
+                        class="px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+                    Next: Quick Picks
+                    <svg class="inline w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Quick Picks -->
+        <div id="step-2" class="space-y-6 hidden">
+            <!-- Industry -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="flex items-center justify-center w-7 h-7 bg-pink-400/20 text-pink-400 text-xs font-bold rounded-lg">2a</span>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">What industry are you in?</h2>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Select one or more that apply</p>
+                <div class="flex flex-wrap gap-2" id="industry-chips">
+                    <button type="button" class="chip" data-group="industry" data-value="Tech & SaaS" onclick="toggleChip(this)">Tech & SaaS</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Fashion & Apparel" onclick="toggleChip(this)">Fashion & Apparel</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Food & Beverage" onclick="toggleChip(this)">Food & Beverage</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Health & Fitness" onclick="toggleChip(this)">Health & Fitness</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Beauty & Skincare" onclick="toggleChip(this)">Beauty & Skincare</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Education" onclick="toggleChip(this)">Education</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Real Estate" onclick="toggleChip(this)">Real Estate</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Finance" onclick="toggleChip(this)">Finance</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Lifestyle & Travel" onclick="toggleChip(this)">Lifestyle & Travel</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Creative Agency" onclick="toggleChip(this)">Creative Agency</button>
+                    <button type="button" class="chip" data-group="industry" data-value="E-Commerce" onclick="toggleChip(this)">E-Commerce</button>
+                    <button type="button" class="chip" data-group="industry" data-value="Coaching & Consulting" onclick="toggleChip(this)">Coaching & Consulting</button>
+                </div>
+            </div>
+
+            <!-- Visual Vibe -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="flex items-center justify-center w-7 h-7 bg-amber-400/20 text-amber-400 text-xs font-bold rounded-lg">2b</span>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">What visual vibe fits your brand?</h2>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Pick 1-3 that match your style</p>
+                <div class="flex flex-wrap gap-2" id="visual_vibe-chips">
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Minimalist & Clean" onclick="toggleChip(this)">Minimalist & Clean</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Bold & Colorful" onclick="toggleChip(this)">Bold & Colorful</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Luxury & Elegant" onclick="toggleChip(this)">Luxury & Elegant</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Playful & Fun" onclick="toggleChip(this)">Playful & Fun</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Earthy & Natural" onclick="toggleChip(this)">Earthy & Natural</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Dark & Moody" onclick="toggleChip(this)">Dark & Moody</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Corporate & Professional" onclick="toggleChip(this)">Corporate & Professional</button>
+                    <button type="button" class="chip" data-group="visual_vibe" data-value="Retro & Vintage" onclick="toggleChip(this)">Retro & Vintage</button>
+                </div>
+            </div>
+
+            <!-- Target Audience -->
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="flex items-center justify-center w-7 h-7 bg-green-500/20 text-green-400 text-xs font-bold rounded-lg">2c</span>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Who is your target audience?</h2>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Select all that apply</p>
+                <div class="flex flex-wrap gap-2" id="target_audience-chips">
+                    <button type="button" class="chip" data-group="target_audience" data-value="Gen Z (18-24)" onclick="toggleChip(this)">Gen Z (18-24)</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Young Professionals (25-34)" onclick="toggleChip(this)">Young Professionals (25-34)</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Millennials (28-40)" onclick="toggleChip(this)">Millennials (28-40)</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Business Owners" onclick="toggleChip(this)">Business Owners</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Parents & Families" onclick="toggleChip(this)">Parents & Families</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Health-Conscious" onclick="toggleChip(this)">Health-Conscious</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Tech Enthusiasts" onclick="toggleChip(this)">Tech Enthusiasts</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Creative Professionals" onclick="toggleChip(this)">Creative Professionals</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Luxury Consumers" onclick="toggleChip(this)">Luxury Consumers</button>
+                    <button type="button" class="chip" data-group="target_audience" data-value="Students" onclick="toggleChip(this)">Students</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button type="button" onclick="goToStep(1)"
+                        class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Back
+                </button>
+                <button type="button" onclick="goToStep(3)"
+                        class="px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218] text-white text-sm font-medium rounded-lg transition-colors">
+                    Next: Research Sources
+                    <svg class="inline w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Research Sources -->
+        <div id="step-3" class="space-y-6 hidden">
+            <div class="bg-white dark:bg-[#1E1E1E] border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="flex items-center justify-center w-7 h-7 bg-[#26A0D8]/20 text-[#26A0D8] text-xs font-bold rounded-lg">3</span>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Help AI research your brand</h2>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Optional — but the more context, the better the results</p>
+
+                <div class="space-y-5">
+                    <div>
+                        <label for="website_url" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+                            Website URL
+                            <span class="text-gray-500 font-normal ml-1">(optional)</span>
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-[#333] rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </div>
+                            <input type="url" id="website_url" name="website_url"
+                                   class="flex-1 px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                                   placeholder="https://yourbrand.com">
+                        </div>
+                        <p class="mt-1.5 text-xs text-gray-500">We'll analyze your website to understand your brand, products, and messaging</p>
+                    </div>
+
+                    <div>
+                        <label for="social_url" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+                            Social Media / LinkedIn Profile
+                            <span class="text-gray-500 font-normal ml-1">(optional)</span>
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-[#333] rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <input type="url" id="social_url" name="social_url"
+                                   class="flex-1 px-4 py-2.5 bg-white dark:bg-[#141414] border border-[#26A0D8]/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400
+                                          focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:border-transparent transition-colors"
+                                   placeholder="https://linkedin.com/in/yourprofile or https://instagram.com/yourbrand">
+                        </div>
+                        <p class="mt-1.5 text-xs text-gray-500">We'll study your existing content and personal brand to match the tone</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="bg-gray-50 dark:bg-[#1E1E1E]/50 border border-[#26A0D8]/20 dark:border-[#26A0D8]/40 rounded-xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-[#F18523] rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-medium text-gray-900 dark:text-white">Ready to build your brand</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">AI will research, analyze, and create your complete brand identity</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="button" onclick="goToStep(2)"
+                            class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button type="submit" id="submit-btn"
+                            class="inline-flex items-center px-6 py-2.5 bg-[#F18523] hover:bg-[#D97218]
+                                   text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F18523] focus:ring-offset-2
+                                   focus:ring-offset-white dark:focus:ring-offset-[#1E1E1E] transition-all shadow-lg shadow-[#F18523]/20">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span id="submit-text">Build My Brand with AI</span>
+                        <svg id="submit-spinner" class="hidden animate-spin w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .chip {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border-radius: 9999px;
+        border: 1px solid rgba(38, 160, 216, 0.2);
+        background: white;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+    }
+    @media (prefers-color-scheme: dark) {
+        .chip {
+            border-color: rgba(38, 160, 216, 0.4);
+            background: #1E1E1E;
+            color: #d1d5db;
+        }
+        .chip:hover {
+            border-color: rgba(38, 160, 216, 0.5);
+            background: #2A2A2A;
+        }
+    }
+    .dark .chip {
+        border-color: rgba(38, 160, 216, 0.4);
+        background: #1E1E1E;
+        color: #d1d5db;
+    }
+    .dark .chip:hover {
+        border-color: rgba(38, 160, 216, 0.5);
+        background: #2A2A2A;
+    }
+    .chip:hover {
+        border-color: rgba(38, 160, 216, 0.3);
+        background: #f3f4f6;
+    }
+    .chip.active {
+        border-color: #F18523;
+        background: rgba(241, 133, 35, 0.15);
+        color: #F18523;
+    }
+    .dark .chip.active {
+        border-color: #F18523;
+        background: rgba(241, 133, 35, 0.15);
+        color: #F18523;
+    }
+</style>
+
+<script>
+    var currentStep = 1;
+
+    function goToStep(step) {
+        // Validate step 1 before advancing
+        if (step > 1 && currentStep === 1) {
+            var name = document.getElementById('brand_name').value.trim();
+            var desc = document.getElementById('brand_description').value.trim();
+            if (!name) {
+                document.getElementById('brand_name').focus();
+                return;
+            }
+            if (!desc) {
+                document.getElementById('brand_description').focus();
+                return;
+            }
+        }
+
+        // Hide all steps
+        for (var i = 1; i <= 3; i++) {
+            document.getElementById('step-' + i).classList.add('hidden');
+        }
+        // Show target step
+        document.getElementById('step-' + step).classList.remove('hidden');
+        currentStep = step;
+
+        // Update progress indicators
+        for (var i = 1; i <= 3; i++) {
+            var ind = document.getElementById('step-ind-' + i);
+            var circle = ind.querySelector('span:first-child');
+            var label = ind.querySelector('span:last-child');
+            if (i <= step) {
+                circle.className = 'flex items-center justify-center w-6 h-6 bg-[#F18523] text-white rounded-full';
+                label.className = 'text-[#F18523]';
+            } else {
+                circle.className = 'flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-gray-300 rounded-full';
+                label.className = 'text-gray-500 dark:text-gray-400';
+            }
+        }
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Chip toggle logic
+    function toggleChip(el) {
+        el.classList.toggle('active');
+        syncChips(el.dataset.group);
+    }
+
+    function syncChips(group) {
+        var chips = document.querySelectorAll('.chip.active[data-group="' + group + '"]');
+        var values = [];
+        chips.forEach(function(c) { values.push(c.dataset.value); });
+        document.getElementById(group + '-input').value = values.join(',');
+    }
+
+    // Show loading spinner on submit
+    document.getElementById('brand-form').addEventListener('submit', function() {
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.classList.add('opacity-75');
+        document.getElementById('submit-text').textContent = 'AI is researching your brand...';
+        document.getElementById('submit-spinner').classList.remove('hidden');
+    });
+</script>
+{% endblock %}
