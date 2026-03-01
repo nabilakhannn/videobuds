@@ -30,12 +30,37 @@ _IMAGE_MODELS = {
 }
 
 # --- WaveSpeed video model IDs ---
+# image-to-video: requires an image start frame
+# text-to-video: no image required
 _VIDEO_MODELS = {
-    "kling-3.0": "kwaivgi/kling-v3.0-pro/image-to-video",
-    "kling-3.0-std": "kwaivgi/kling-v3.0-std/image-to-video",
-    "sora-2": "openai/sora-2/image-to-video",
-    "sora-2-pro": "openai/sora-2/image-to-video-pro",
+    "kling-3.0":         "kwaivgi/kling-v3.0-pro/image-to-video",
+    "kling-3.0-std":     "kwaivgi/kling-v3.0-std/image-to-video",
+    "sora-2":            "openai/sora-2/image-to-video",
+    "sora-2-pro":        "openai/sora-2/image-to-video-pro",
+    # text-to-video variants (no image required)
+    "kling-3.0-t2v":     "kwaivgi/kling-v3.0-pro/text-to-video",
+    "kling-3.0-std-t2v": "kwaivgi/kling-v3.0-std/text-to-video",
+    "sora-2-t2v":        "openai/sora-2/text-to-video",
+    "sora-2-pro-t2v":    "openai/sora-2/text-to-video-pro",
 }
+
+def _sora_t2v_size(aspect_ratio):
+    """Map aspect ratio to Sora text-to-video 'size' string."""
+    return {
+        "9:16": "720*1280",
+        "16:9": "1280*720",
+        "1:1":  "720*720",
+    }.get(aspect_ratio, "720*1280")
+
+
+def _sora_t2v_duration(duration):
+    """Clamp duration to Sora text-to-video valid values: 4, 8, or 12."""
+    d = int(duration)
+    if d <= 5:
+        return 4
+    if d <= 10:
+        return 8
+    return 12
 
 # Module-level storage: task_id → poll_url
 # Populated by submit_image/submit_video, consumed by poll_image/poll_video/poll_tasks_parallel
@@ -123,9 +148,12 @@ def submit_video(prompt, image_url=None, model="sora-2-pro",
     """
     Submit a video generation task to WaveSpeed AI.
 
+    Automatically selects image-to-video or text-to-video endpoint based
+    on whether image_url is provided.
+
     Args:
         prompt: Video prompt text
-        image_url: Source image URL (start frame)
+        image_url: Source image URL (start frame). If None, text-to-video is used.
         model: "kling-3.0", "kling-3.0-std", "sora-2", or "sora-2-pro"
         duration: Video duration in seconds
         aspect_ratio: Aspect ratio string
@@ -134,14 +162,22 @@ def submit_video(prompt, image_url=None, model="sora-2-pro",
     Returns:
         str: task_id for polling
     """
+    t2v = not bool(image_url)  # text-to-video mode when no image
+
     # For Kling, select pro/std model variant based on mode
     if model == "kling-3.0" and mode == "std":
-        model_id = _VIDEO_MODELS.get("kling-3.0-std")
+        base_key = "kling-3.0-std"
     else:
-        model_id = _VIDEO_MODELS.get(model)
+        base_key = model
+
+    if t2v:
+        model_id = _VIDEO_MODELS.get(f"{base_key}-t2v") or _VIDEO_MODELS.get(base_key)
+    else:
+        model_id = _VIDEO_MODELS.get(base_key)
+
     if not model_id:
         raise ValueError(f"WaveSpeed doesn't support video model: '{model}'. "
-                         f"Available: {list(_VIDEO_MODELS.keys())}")
+                         f"Available: {[k for k in _VIDEO_MODELS if not k.endswith('-t2v')]}")
 
     if model.startswith("kling"):
         payload = {
@@ -152,28 +188,36 @@ def submit_video(prompt, image_url=None, model="sora-2-pro",
         }
         if image_url:
             payload["image"] = image_url
+        else:
+            payload["aspect_ratio"] = aspect_ratio
 
     elif model.startswith("sora"):
-        # Map duration: WaveSpeed Sora accepts 4/8/12/16/20
-        dur_int = int(duration)
-        if dur_int <= 5:
-            ws_duration = 4
-        elif dur_int <= 10:
-            ws_duration = 8
-        elif dur_int <= 14:
-            ws_duration = 12
-        elif dur_int <= 18:
-            ws_duration = 16
+        if t2v:
+            # Sora text-to-video uses 'size' and only allows 4/8/12s
+            payload = {
+                "prompt": prompt,
+                "size": _sora_t2v_size(aspect_ratio),
+                "duration": _sora_t2v_duration(duration),
+            }
         else:
-            ws_duration = 20
-
-        payload = {
-            "prompt": prompt,
-            "duration": ws_duration,
-        }
-        if model == "sora-2-pro":
-            payload["resolution"] = "1080p"
-        if image_url:
+            # Sora image-to-video: accepts 4/8/12/16/20s
+            dur_int = int(duration)
+            if dur_int <= 5:
+                ws_duration = 4
+            elif dur_int <= 10:
+                ws_duration = 8
+            elif dur_int <= 14:
+                ws_duration = 12
+            elif dur_int <= 18:
+                ws_duration = 16
+            else:
+                ws_duration = 20
+            payload = {
+                "prompt": prompt,
+                "duration": ws_duration,
+            }
+            if model == "sora-2-pro":
+                payload["resolution"] = "1080p"
             payload["image"] = image_url
     else:
         raise ValueError(f"No payload builder for model: {model}")
