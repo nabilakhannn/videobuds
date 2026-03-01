@@ -196,6 +196,68 @@ def _call_gemini_with_image(prompt, image_path, model=None):
     return text
 
 
+def _call_gemini_with_video(prompt, video_path, model=None):
+    """Call Gemini generateContent with text + video (multimodal, ≤20 MB).
+
+    Sends the video as base64 inline_data alongside the text prompt so
+    Gemini can actually *watch* the video for style / content analysis.
+    Supported formats: MP4, MOV, WebM, AVI, MKV.
+    """
+    import base64
+
+    model = model or _GEMINI_MODEL
+    api_key = _get_api_key()
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY not configured")
+
+    _MIME_MAP = {
+        ".mp4":  "video/mp4",
+        ".mov":  "video/quicktime",
+        ".avi":  "video/x-msvideo",
+        ".webm": "video/webm",
+        ".mkv":  "video/x-matroska",
+        ".m4v":  "video/mp4",
+    }
+    ext = os.path.splitext(video_path)[1].lower()
+    mime_type = _MIME_MAP.get(ext, "video/mp4")
+
+    with open(video_path, "rb") as f:
+        video_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    url = _GENERATE_URL.format(model=model)
+    headers = {
+        "x-goog-api-key": api_key,
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "contents": [{
+            "parts": [
+                {"text": prompt},
+                {"inline_data": {"mime_type": mime_type, "data": video_b64}},
+            ]
+        }],
+    }
+
+    response = requests.post(url, headers=headers, json=payload, timeout=180)
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Gemini video API error ({response.status_code}): {response.text[:500]}"
+        )
+
+    result = response.json()
+    candidates = result.get("candidates", [])
+    if not candidates:
+        raise RuntimeError("No candidates in Gemini video response")
+
+    parts = candidates[0].get("content", {}).get("parts", [])
+    text = "".join(p.get("text", "") for p in parts).strip()
+    if not text:
+        raise RuntimeError("Empty text in Gemini video response")
+
+    logger.info("Gemini video analysis succeeded (%d chars)", len(text))
+    return text
+
+
 # ---------------------------------------------------------------------------
 # Helper: fetch and extract text from a URL for AI analysis
 # ---------------------------------------------------------------------------
