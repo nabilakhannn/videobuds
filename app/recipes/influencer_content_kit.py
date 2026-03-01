@@ -243,7 +243,21 @@ class InfluencerContentKit(BaseRecipe):
         images_generated = 0
 
         for i, scene in enumerate(scenes):
-            image_prompt = scene.get("image_prompt", scene.get("scene", brief))
+            raw_prompt = scene.get("image_prompt", scene.get("scene", brief))
+
+            # Prefix the prompt so Gemini generates a NEW scene instead of
+            # echoing the reference photo.  The reference image is attached
+            # as inline data — we explicitly instruct the model to treat it
+            # only as a visual reference for the person's appearance.
+            image_prompt = (
+                "Generate a completely new, photorealistic photograph. "
+                "Use the attached photo ONLY as a reference for the "
+                "person's physical appearance (face, hair, body type). "
+                "Place this person in a brand-new scene with different "
+                "clothing, background, lighting, and composition. "
+                "Do NOT reproduce the original photo. "
+                "Scene description: " + raw_prompt
+            )
 
             try:
                 self.report_progress(
