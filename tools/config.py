@@ -29,6 +29,9 @@ HIGGSFIELD_API_KEY_SECRET = os.getenv("HIGGSFIELD_API_KEY_SECRET")
 
 # --- WaveSpeed AI ---
 WAVESPEED_API_KEY = os.getenv("WAVESPEED_API_KEY")
+
+# --- D-ID AI (talking head fallback) ---
+DID_API_KEY = os.getenv("DID_API_KEY")
 WAVESPEED_API_URL = "https://api.wavespeed.ai/api/v3"
 
 # --- Kie AI Endpoints ---
@@ -72,6 +75,7 @@ COSTS = {
     ("speak-v2", "higgsfield"): 0.15,
     ("talking-photo", "higgsfield"): 0.10,
     ("infinitetalk", "wavespeed"): 0.20,
+    ("d-id", "did"): 0.10,
 }
 
 # --- Actual costs (what the operator actually pays — shown to admins) ---
@@ -103,6 +107,7 @@ ACTUAL_COSTS = {
     ("speak-v2", "higgsfield"): 0.05,
     ("talking-photo", "higgsfield"): 0.03,
     ("infinitetalk", "wavespeed"): 0.20,
+    ("d-id", "did"): 0.05,
 }
 
 # --- Default Models ---
@@ -150,6 +155,7 @@ TALKING_HEAD_MODELS = {
     "speak-v2": "higgsfield",       # Higgsfield Platform API
     "talking-photo": "higgsfield",  # Higgsfield Legacy API
     "infinitetalk": "wavespeed",    # WaveSpeed InfiniteTalk
+    "d-id": "did",                  # D-ID (free-tier fallback)
 }
 
 

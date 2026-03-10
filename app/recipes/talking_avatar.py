@@ -109,12 +109,13 @@ class TalkingAvatar(BaseRecipe):
   - B-roll images are created matching the style reference
   - B-roll video clips are generated from those images
 
-**3-tier quality chain for talking head (automatic fallback):**
+**4-tier quality chain for talking head (automatic fallback):**
 | Priority | Engine | Quality |
 |----------|--------|---------|
 | 1 | Higgsfield Speak v2 | Best — natural gestures & movement |
 | 2 | Higgsfield Talking Photo | Good — reliable lip-sync |
-| 3 | WaveSpeed InfiniteTalk | Baseline — always available |
+| 3 | WaveSpeed InfiniteTalk | Solid — fast delivery |
+| 4 | D-ID | Reliable — free-tier available |
 
 **Use cases:**
 - 📢 Product explainer videos without filming
@@ -183,6 +184,22 @@ class TalkingAvatar(BaseRecipe):
                     {"value": "calm_male", "label": "Calm Male"},
                 ],
                 help_text="Choose the voice style for the AI speech.",
+            ),
+            InputField(
+                name="engine_preference",
+                label="Talking Head Engine",
+                field_type="select",
+                default="auto",
+                options=[
+                    {"value": "auto",        "label": "Auto — try best available"},
+                    {"value": "speak-v2",    "label": "Higgsfield Speak v2 (best quality)"},
+                    {"value": "infinitetalk","label": "WaveSpeed InfiniteTalk (fast)"},
+                    {"value": "d-id",        "label": "D-ID (free tier)"},
+                ],
+                help_text=(
+                    "Pick a specific engine or let the app choose automatically. "
+                    "Auto always falls back to the next engine if the chosen one fails."
+                ),
             ),
             # ── B-Roll inputs (from R52 pipeline) ─────────────────────
             InputField(
@@ -385,73 +402,96 @@ class TalkingAvatar(BaseRecipe):
         video_url = None
         method_used = None
 
-        # Priority 1: Higgsfield Speak v2 (best quality)
-        try:
-            logger.info("Trying Speak v2 (high quality)…")
-            request_id = higgsfield.submit_speak_v2(
-                image_url=image_url,
-                audio_url=audio_url,
-                prompt=speech_prompt,
-                quality="high",
-                duration=15,
-            )
-            result = higgsfield.poll_speak_v2(
-                request_id, max_wait=600, poll_interval=10
-            )
-            video_url = result.get("result_url", "")
+        # Build engine priority list based on user preference.
+        # User's preferred engine goes first; remaining engines follow as fallbacks.
+        engine_pref = inputs.get("engine_preference", "auto")
+        _ALL_ENGINES = ["speak-v2", "talking-photo", "infinitetalk", "d-id"]
+        if engine_pref == "auto" or engine_pref not in _ALL_ENGINES:
+            engine_order = _ALL_ENGINES
+        else:
+            # Chosen engine first, then the rest in default order
+            engine_order = [engine_pref] + [e for e in _ALL_ENGINES if e != engine_pref]
+
+        for engine in engine_order:
             if video_url:
-                method_used = "speak-v2"
-                total_cost += get_cost("speak-v2", "higgsfield")
-                logger.info("Speak v2 succeeded: %s", video_url[:80])
-        except Exception as exc:
-            logger.warning("Speak v2 failed, trying fallback: %s", exc)
+                break
 
-        # Priority 2: Higgsfield talking_photo (legacy fallback)
-        if not video_url:
-            try:
-                logger.info("Trying talking_photo (fallback)…")
-                gen_id = higgsfield.submit_talking_photo(
-                    image_url=image_url,
-                    audio_url=audio_url,
-                    prompt=speech_prompt,
-                )
-                result = higgsfield.poll_talking_photo(
-                    gen_id, max_wait=300, poll_interval=5
-                )
-                video_url = result.get("result_url", "")
-                if video_url:
-                    method_used = "talking-photo"
-                    total_cost += get_cost("talking-photo", "higgsfield")
-                    logger.info(
-                        "talking_photo succeeded: %s", video_url[:80]
+            if engine == "speak-v2":
+                try:
+                    logger.info("Trying Speak v2 (high quality)…")
+                    request_id = higgsfield.submit_speak_v2(
+                        image_url=image_url,
+                        audio_url=audio_url,
+                        prompt=speech_prompt,
+                        quality="high",
+                        duration=15,
                     )
-            except Exception as exc:
-                logger.warning(
-                    "talking_photo failed, trying InfiniteTalk: %s", exc
-                )
+                    result = higgsfield.poll_speak_v2(
+                        request_id, max_wait=600, poll_interval=10
+                    )
+                    video_url = result.get("result_url", "")
+                    if video_url:
+                        method_used = "speak-v2"
+                        total_cost += get_cost("speak-v2", "higgsfield")
+                        logger.info("Speak v2 succeeded: %s", video_url[:80])
+                except Exception as exc:
+                    logger.warning("Speak v2 failed: %s", exc)
 
-        # Priority 3: WaveSpeed InfiniteTalk (last resort)
-        if not video_url:
-            try:
-                logger.info("Trying InfiniteTalk (last resort)…")
-                get_url = wavespeed.submit_infinitetalk(
-                    audio_url=audio_url,
-                    image_url=image_url,
-                    prompt=speech_prompt,
-                    resolution="480p",
-                )
-                video_url = wavespeed.poll_infinitetalk(
-                    get_url, max_wait=600, interval=5
-                )
-                if video_url:
-                    method_used = "infinitetalk"
-                    total_cost += get_cost("infinitetalk", "wavespeed")
-                    logger.info(
-                        "InfiniteTalk succeeded: %s",
-                        video_url[:80] if isinstance(video_url, str) else video_url,
+            elif engine == "talking-photo":
+                try:
+                    logger.info("Trying talking_photo…")
+                    gen_id = higgsfield.submit_talking_photo(
+                        image_url=image_url,
+                        audio_url=audio_url,
+                        prompt=speech_prompt,
                     )
-            except Exception as exc:
-                logger.error("InfiniteTalk also failed: %s", exc)
+                    result = higgsfield.poll_talking_photo(
+                        gen_id, max_wait=300, poll_interval=5
+                    )
+                    video_url = result.get("result_url", "")
+                    if video_url:
+                        method_used = "talking-photo"
+                        total_cost += get_cost("talking-photo", "higgsfield")
+                        logger.info("talking_photo succeeded: %s", video_url[:80])
+                except Exception as exc:
+                    logger.warning("talking_photo failed: %s", exc)
+
+            elif engine == "infinitetalk":
+                try:
+                    logger.info("Trying InfiniteTalk…")
+                    get_url = wavespeed.submit_infinitetalk(
+                        audio_url=audio_url,
+                        image_url=image_url,
+                        prompt=speech_prompt,
+                        resolution="480p",
+                    )
+                    video_url = wavespeed.poll_infinitetalk(
+                        get_url, max_wait=600, interval=5
+                    )
+                    if video_url:
+                        method_used = "infinitetalk"
+                        total_cost += get_cost("infinitetalk", "wavespeed")
+                        logger.info(
+                            "InfiniteTalk succeeded: %s",
+                            video_url[:80] if isinstance(video_url, str) else video_url,
+                        )
+                except Exception as exc:
+                    logger.warning("InfiniteTalk failed: %s", exc)
+
+            elif engine == "d-id":
+                try:
+                    from tools.providers import did
+                    logger.info("Trying D-ID…")
+                    talk_id = did.submit_talk(
+                        image_url=image_url,
+                        audio_url=audio_url,
+                    )
+                    video_url = did.poll_talk(talk_id, max_wait=300, poll_interval=5)
+                    if video_url:
+                        method_used = "d-id"
+                        logger.info("D-ID succeeded: %s", video_url[:80])
+                except Exception as exc:
+                    logger.error("D-ID failed: %s", exc)
 
         # Record talking-head result
         if video_url:
@@ -465,11 +505,11 @@ class TalkingAvatar(BaseRecipe):
                 "type": "text",
                 "title": "❌ All Engines Failed",
                 "value": (
-                    "All three talking-head engines failed. "
-                    "Please check your API keys and try again. "
-                    "Make sure HIGGSFIELD_API_KEY_ID, "
-                    "HIGGSFIELD_API_KEY_SECRET, and "
-                    "WAVESPEED_API_KEY are set in your .env file."
+                    "All four talking-head engines failed.\n\n"
+                    "**Quickest fix:** Top up WaveSpeed credits at wavespeed.ai, "
+                    "or add a free D-ID account: sign up at studio.d-id.com and "
+                    "add DID_API_KEY to your .env file.\n\n"
+                    "Higgsfield may also be temporarily down — try again in a few minutes."
                 ),
             })
 
