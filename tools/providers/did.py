@@ -34,8 +34,9 @@ def _headers():
             "DID_API_KEY is not set. "
             "Sign up at https://studio.d-id.com and add the key to your .env file."
         )
-    # D-ID accepts the raw API key as Basic auth username with empty password
-    encoded = base64.b64encode(f"{api_key}:".encode()).decode()
+    # D-ID API key is already in "username:password" format (base64_email:secret).
+    # Just base64-encode the whole key as-is for the Basic auth header.
+    encoded = base64.b64encode(api_key.encode()).decode()
     return {
         "Authorization": f"Basic {encoded}",
         "Content-Type": "application/json",
