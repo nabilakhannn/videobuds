@@ -658,6 +658,18 @@ def run_status_json(run_id):
 # Run history (all past runs for the current user)
 # ---------------------------------------------------------------------------
 
+@recipes_bp.route("/history/clear-failed", methods=["POST"])
+@login_required
+def clear_failed_runs():
+    """Delete all failed runs for the current user."""
+    deleted = RecipeRun.query.filter_by(
+        user_id=current_user.id, status="failed"
+    ).delete()
+    db.session.commit()
+    logger.info("User %s cleared %d failed run(s)", current_user.id, deleted)
+    return redirect(url_for("recipes.history"))
+
+
 @recipes_bp.route("/history/")
 @login_required
 def history():
