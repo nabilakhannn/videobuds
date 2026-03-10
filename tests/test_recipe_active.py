@@ -10,14 +10,13 @@ class TestBaseRecipeIsActive:
         assert BaseRecipe.is_active is True
 
     def test_stub_recipes_are_inactive(self):
-        """All 6 known stub recipes should have is_active = False."""
+        """All 5 known stub recipes should have is_active = False."""
         from app.recipes import get_all_recipes
 
         all_recipes = get_all_recipes(include_inactive=True)
         stub_slugs = {
             "clip-factory", "social-scraper",
             "vertical-reframe", "motion-capture", "multi-scene-video",
-            "style-cloner",
         }
         for recipe in all_recipes:
             if recipe.slug in stub_slugs:
@@ -33,7 +32,11 @@ class TestBaseRecipeIsActive:
         active_slugs = {r.slug for r in active_recipes}
 
         # These are the known real (implemented) recipes
-        expected_active = {"ad-video-maker", "photo-to-ad", "news-digest", "image-creator", "video-creator", "content-machine", "talking-avatar", "influencer-content-kit"}
+        expected_active = {
+            "ad-video-maker", "photo-to-ad", "news-digest", "image-creator",
+            "video-creator", "content-machine", "talking-avatar",
+            "influencer-content-kit", "style-cloner",
+        }
         for slug in expected_active:
             assert slug in active_slugs, f"{slug} should be active"
 
@@ -54,7 +57,7 @@ class TestGetAllRecipesFiltering:
         all_recipes = get_all_recipes(include_inactive=True)
         active_only = get_all_recipes(include_inactive=False)
         assert len(all_recipes) > len(active_only)
-        assert len(all_recipes) == len(active_only) + 6  # exactly 6 stubs
+        assert len(all_recipes) == len(active_only) + 5  # exactly 5 stubs
 
     def test_sorted_by_category_then_name(self):
         """Result should be sorted by (category, name)."""

@@ -64,10 +64,10 @@ class TestTalkingAvatarInputFields(unittest.TestCase):
         self.assertEqual(field.default, "3")
 
     def test_total_input_count(self):
-        """Should have 7 input fields (headshot, script, brief, voice, style_ref,
-        generate_broll, broll_count)."""
+        """Should have 8 input fields (headshot, script, brief, voice,
+        engine_preference, style_ref, generate_broll, broll_count)."""
         fields = self.recipe.get_input_fields()
-        self.assertEqual(len(fields), 7)
+        self.assertEqual(len(fields), 8)
 
 
 class TestTalkingAvatarSteps(unittest.TestCase):

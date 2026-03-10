@@ -201,6 +201,7 @@ class TestRecipeLibrary:
             "Image Creator",
             "Video Creator",
             "Content Machine",
+            "Style Cloner",
         ]
         for name in expected:
             assert name in content, f"Active recipe '{name}' not visible in library"
@@ -209,7 +210,7 @@ class TestRecipeLibrary:
         admin_page.goto(f"{BASE_URL}/recipes/")
         admin_page.wait_for_load_state("networkidle")
         content = admin_page.content()
-        stubs = ["Clip Factory", "Motion Capture", "Style Cloner"]
+        stubs = ["Clip Factory", "Motion Capture"]
         for name in stubs:
             assert name not in content, f"Stub recipe '{name}' should be hidden"
 
@@ -514,6 +515,41 @@ class TestInfluencerContentKitE2E:
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# 5d. STYLE CLONER RECIPE
+# ═══════════════════════════════════════════════════════════════════════
+
+class TestStyleClonerE2E:
+    """Style Cloner recipe UI checks."""
+
+    def test_detail_page_loads(self, admin_page):
+        resp = admin_page.goto(f"{BASE_URL}/recipes/style-cloner/")
+        admin_page.wait_for_load_state("networkidle")
+        assert resp.status == 200
+        assert "Style Cloner" in admin_page.content()
+
+    def test_run_form_loads(self, admin_page):
+        admin_page.goto(f"{BASE_URL}/recipes/style-cloner/run/")
+        admin_page.wait_for_load_state("networkidle")
+        assert admin_page.locator("form").count() >= 1, "No form found"
+
+    def test_has_video_upload(self, admin_page):
+        admin_page.goto(f"{BASE_URL}/recipes/style-cloner/run/")
+        admin_page.wait_for_load_state("networkidle")
+        assert admin_page.locator('input[type="file"]').count() >= 1
+
+    def test_has_brand_brief_field(self, admin_page):
+        admin_page.goto(f"{BASE_URL}/recipes/style-cloner/run/")
+        admin_page.wait_for_load_state("networkidle")
+        assert admin_page.locator("textarea").count() >= 1
+
+    def test_brand_persona_selectors(self, admin_page):
+        admin_page.goto(f"{BASE_URL}/recipes/style-cloner/run/")
+        admin_page.wait_for_load_state("networkidle")
+        assert admin_page.locator('select[name="brand_id"]').count() >= 1
+        assert admin_page.locator('select[name="persona_id"]').count() >= 1
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # 6. BRAND & PERSONA
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -655,6 +691,7 @@ class TestRecipeDocumentation:
         ("content-machine", "competitor"),
         ("talking-avatar", "photo"),
         ("influencer-content-kit", "character"),
+        ("style-cloner", "upload"),
     ])
     def test_recipe_detail_has_instructions(self, admin_page, slug, keyword):
         admin_page.goto(f"{BASE_URL}/recipes/{slug}/")
