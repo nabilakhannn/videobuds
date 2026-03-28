@@ -43,7 +43,10 @@ bun.lock
 
 # ── Reference folders (not part of the app) ──────────────────────
 compound-engineering-plugin-main/
+compound-engineering-plugin-main */
 create apps from n8n workflows:agents/
+Json templates/
+rc-method/
 Screenshot*.png
 
 # ── Misc ───────────────────────────────────────────────────────────
